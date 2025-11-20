@@ -1,0 +1,40 @@
+# Core dependencies for Qwen3-VL fine-tuning
+
+# PyTorch (use version compatible with your Mac M-series)
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Hugging Face libraries
+transformers>=4.37.0
+accelerate>=0.25.0
+peft>=0.7.0
+
+# For quantization (may not work well on MPS, but included for compatibility)
+bitsandbytes>=0.41.0
+
+# Data processing
+pillow>=10.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Progress bars and utilities
+tqdm>=4.65.0
+pyyaml>=6.0
+
+# Qwen3-VL specific requirements
+# (transformers may auto-install these, but listing explicitly)
+tiktoken>=0.5.0
+einops>=0.7.0
+transformers_stream_generator>=0.0.4
+
+# Optional: for better visualization
+matplotlib>=3.7.0
+
+# Optional: for Jupyter notebooks
+jupyter>=1.0.0
+ipywidgets>=8.0.0
+
+# Development tools (optional)
+black>=23.0.0
+flake8>=6.0.0
+pytest>=7.3.0

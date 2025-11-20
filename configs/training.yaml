@@ -1,0 +1,90 @@
+# Training configuration for Qwen3-VL fine-tuning
+
+# Model configuration
+model:
+  # Base model name from HuggingFace
+  name: "Qwen/Qwen3-VL-2B-Instruct"
+
+  # Alternative: Use FP8 variant for lower memory
+  # name: "Qwen/Qwen3-VL-2B-Instruct-FP8"
+
+  # Quantization settings (for QLoRA)
+  use_quantization: false  # Set to false for MPS (Mac M-series)
+  quantization_bits: 4  # 4 or 8 (only used if use_quantization=true)
+
+# LoRA configuration
+lora:
+  # LoRA rank (higher = more parameters, better fit but slower)
+  r: 16
+
+  # LoRA alpha (scaling factor, typically 2*r)
+  alpha: 32
+
+  # Dropout rate
+  dropout: 0.05
+
+  # Target modules (attention layers)
+  # Add MLP layers for more aggressive tuning:
+  # target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+# Training hyperparameters
+training:
+  # Number of epochs
+  num_epochs: 3
+
+  # Learning rate
+  learning_rate: 2.0e-4
+
+  # Batch size (effective batch size = batch_size * gradient_accumulation_steps)
+  batch_size: 4
+
+  # Gradient accumulation steps
+  gradient_accumulation_steps: 2
+
+  # Warmup steps
+  warmup_steps: 100
+
+  # Maximum gradient norm for clipping
+  max_grad_norm: 1.0
+
+  # Mixed precision training (set to null for MPS)
+  mixed_precision: null  # Options: "fp16", "bf16", null
+
+# Logging and checkpointing
+logging:
+  # Log training metrics every N steps
+  logging_steps: 10
+
+  # Evaluate on validation set every N steps (null = end of epoch only)
+  eval_steps: null
+
+  # Save checkpoint every N steps (null = end of epoch only)
+  save_steps: null
+
+  # Output directories
+  output_dir: "outputs/checkpoints"
+  log_dir: "outputs/logs"
+
+  # Save visualizations during evaluation
+  save_visualizations: true
+  visualization_dir: "outputs/visualizations"
+
+# Evaluation settings
+evaluation:
+  # IoU thresholds for success rate
+  iou_thresholds: [0.5, 0.75]
+
+  # Maximum new tokens to generate
+  max_new_tokens: 100
+
+  # Save predictions to file
+  save_predictions: true
+
+# Device settings
+device:
+  # Device type: "mps" (Mac M-series), "cuda" (NVIDIA GPU), "cpu"
+  type: "mps"
+
+  # Maximum memory per device (optional, for multi-GPU)
+  max_memory: null

@@ -1,0 +1,43 @@
+# Data configuration for saliency-based main subject detection
+
+# Dataset paths
+data:
+  # Root directory for raw data
+  # Using DUTS-TR dataset (Wang et al., CVPR 2017)
+  # See CITATIONS.md for full citation and download instructions
+  raw_data_dir: "data/raw/duts-tr"
+
+  # Processed data directory (contains train.json, val.json, test.json)
+  processed_data_dir: "data/processed"
+
+  # Image and mask subdirectories (relative to raw_data_dir)
+  image_subdir: "images"
+  mask_subdir: "masks"
+
+  # File suffixes
+  image_suffix: ".jpg"
+  mask_suffix: ".png"
+
+# Split sizes
+splits:
+  train_size: 2000
+  val_size: 500
+  test_size: 500
+  seed: 42
+
+# Data processing
+processing:
+  # Image resize (shorter edge), set to null to disable
+  resize: 320
+
+  # Data augmentation for training
+  augment_train: true
+
+  # Maximum samples for debugging (null = use all)
+  max_samples: null
+
+# DataLoader settings
+dataloader:
+  batch_size: 4
+  num_workers: 0  # Use 0 for MPS compatibility
+  pin_memory: false  # MPS doesn't support pin_memory
