@@ -1,21 +1,26 @@
 """
-Prompt templates for the main subject bounding box task.
+Prompt templates for RefCOCO phrase grounding task.
 """
 
 
-def build_main_subject_prompt() -> str:
+def build_grounding_prompt(phrase: str) -> str:
     """
-    Returns the fixed instruction string for the main subject detection task.
+    Build the instruction prompt for referring expression grounding.
 
-    The model should respond with ONLY a JSON object containing normalized
-    bounding box coordinates.
+    Given a phrase describing a specific object or region in an image,
+    the model should output a JSON bounding box around that region.
+
+    Args:
+        phrase: Referring expression (e.g., "the red car on the left")
 
     Returns:
-        Instruction prompt string
+        Formatted instruction prompt string
     """
-    prompt = """You are a vision assistant. You are given an image. Your job is to find the single most important, visually salient subject in the image and draw a tight bounding box around it.
+    prompt = f"""You are a vision assistant. I will give you an image and a short description that refers to exactly one object or region in the image.
 
-Respond with ONLY a JSON object containing four keys: "x_min", "y_min", "x_max", "y_max". All values must be floats between 0 and 1, representing normalized coordinates relative to the image width and height.
+Description: "{phrase}"
+
+Respond with ONLY a JSON object with keys "x_min", "y_min", "x_max", "y_max". All values must be floats between 0 and 1, representing the bounding box for the region matching the description, normalized by image width and height.
 
 JSON:"""
 
@@ -29,14 +34,15 @@ def build_system_message() -> str:
     Returns:
         System message string
     """
-    return "You are a helpful vision assistant that detects main subjects in images."
+    return "You are a helpful vision assistant that localizes objects based on text descriptions."
 
 
-def format_training_messages(image_placeholder: str = "<image>") -> list:
+def format_training_messages(phrase: str, image_placeholder: str = "<image>") -> list:
     """
     Format messages for training with Qwen3-VL chat template.
 
     Args:
+        phrase: Referring expression describing the target object
         image_placeholder: Placeholder string for image in message
 
     Returns:
@@ -45,20 +51,21 @@ def format_training_messages(image_placeholder: str = "<image>") -> list:
     return [
         {
             "role": "user",
-            "content": f"{image_placeholder}\n{build_main_subject_prompt()}"
+            "content": f"{image_placeholder}\n{build_grounding_prompt(phrase)}"
         }
     ]
 
 
-def format_inference_messages(image_placeholder: str = "<image>") -> list:
+def format_inference_messages(phrase: str, image_placeholder: str = "<image>") -> list:
     """
     Format messages for inference with Qwen3-VL chat template.
 
     Args:
+        phrase: Referring expression describing the target object
         image_placeholder: Placeholder string for image in message
 
     Returns:
         List of message dicts for chat template
     """
     # Same as training messages, but without the assistant response
-    return format_training_messages(image_placeholder)
+    return format_training_messages(phrase, image_placeholder)

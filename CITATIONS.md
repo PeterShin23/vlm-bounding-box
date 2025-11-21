@@ -1,119 +1,158 @@
 # Dataset Citations
 
-This project uses the **DUTS (Densely Annotated UTterance Saliency)** dataset for training and evaluation.
+This project uses the **RefCOCO** dataset for referring expression grounding training and evaluation.
 
-## DUTS Dataset
+## RefCOCO Dataset
 
 ### Citation
 
 **Paper:**
-Lijun Wang, Huchuan Lu, Yifan Wang, Mengyang Feng, Dong Wang, Baocai Yin, Xiang Ruan. "Learning to Detect Salient Objects with Image-level Supervision", CVPR 2017.
+Licheng Yu, Patrick Poirson, Shan Yang, Alexander C. Berg, Tamara L. Berg. "Modeling Context in Referring Expressions", ECCV 2016.
 
 **BibTeX:**
 ```bibtex
-@inproceedings{wang2017duts,
-  title={Learning to Detect Salient Objects with Image-level Supervision},
-  author={Wang, Lijun and Lu, Huchuan and Wang, Yifan and Feng, Mengyang and Wang, Dong and Yin, Baocai and Ruan, Xiang},
-  booktitle={IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year={2017}
+@inproceedings{yu2016refcoco,
+  title={Modeling Context in Referring Expressions},
+  author={Yu, Licheng and Poirson, Patrick and Yang, Shan and Berg, Alexander C. and Berg, Tamara L.},
+  booktitle={European Conference on Computer Vision (ECCV)},
+  year={2016}
 }
 ```
 
 ### Dataset Information
 
-**Official Website:** http://saliencydetection.net/duts/
+**HuggingFace:** https://huggingface.co/datasets/lmms-lab/RefCOCO
+
+**Original Website:** https://github.com/lichengunc/refer
 
 **Dataset Statistics:**
-- **DUTS-TR (Training Set)**: 10,553 images with pixel-level annotations
-- **DUTS-TE (Test Set)**: 5,019 images with pixel-level annotations
+- **val split**: 8,811 samples (use for **training**)
+- **test split**: 5,000 samples (use for **evaluation**)
+- **testA split**: 1,975 samples (people subset)
+- **testB split**: 1,810 samples (objects subset)
+
+⚠️ **IMPORTANT**: RefCOCO has NO "train" split on HuggingFace. Use **"val"** split for training!
 
 **Data Sources:**
-- Training images: ImageNet DET training/val sets
-- Test images: ImageNet DET test set and SUN dataset
+- Images from MS COCO dataset
+- Referring expressions collected via Amazon Mechanical Turk
+- Multiple expressions per object with different levels of detail
 
-**Annotations:**
-- Pixel-level ground truth masks
-- Manually annotated by 50 subjects
-- Challenging scenarios for saliency detection
+**Task:**
+- Given an image and a referring expression (phrase), predict the bounding box of the described object/region
+- Referring expressions: Natural language descriptions like "the red car on the left", "person wearing blue shirt"
+
+**Variants:**
+- **RefCOCO**: Original dataset (allows location words)
+- **RefCOCO+**: No location words allowed in expressions
+- **RefCOCOg**: Longer, more complex expressions
+
+This project uses the **RefCOCO** variant.
 
 ### Copyright and Usage
 
-**Copyright:** All rights reserved by the original authors of the DUTS Image Dataset.
+**Copyright:** See original RefCOCO repository for licensing information.
 
-**Usage:** When using this dataset, please cite the original CVPR 2017 paper above.
-
-### Important Dataset Update (2018-01-22)
-
-The dataset was updated in January 2018 to correct some errors. If you downloaded the dataset before this date, please re-download or apply the following corrections manually:
-
-**DUTS-TE corrections:**
-- Delete files: `ILSVRC2012_test_00036002.jpg`, `sun_bcogaqperiljqupq.jpg`
-
-**DUTS-TR corrections:**
-- Delete files: `ILSVRC2014_train_00023530.png`, `n01532829_13482.png`, `n04442312_17818.png`
-- Convert to PNG and remove JPG: `ILSVRC2014_train_00023530.jpg`, `n01532829_13482.jpg`, `n04442312_17818.jpg`
-
-The download links provided in this project point to the corrected version (post-2018).
+**Usage:** When using this dataset, please cite the original ECCV 2016 paper above.
 
 ## Dataset Description
 
 ### Purpose
 
-DUTS was created to address limitations in existing saliency detection datasets:
-- Previous datasets had insufficient samples for training deep neural networks
-- No well-established train/test protocol for fair comparison
-- Need for more challenging and diverse scenarios
+RefCOCO was created to advance research in referring expression grounding:
+- Enable models to understand natural language descriptions of objects in images
+- Provide a benchmark for phrase-conditional object localization
+- Study how language can be used to disambiguate between multiple objects
+- Research multimodal understanding (vision + language)
 
 ### Key Features
 
-1. **Large Scale**: Currently the largest saliency detection benchmark with explicit train/test split
-2. **High Quality**: Pixel-level annotations with careful manual verification
-3. **Challenging**: Contains complex scenes with multiple objects, cluttered backgrounds
-4. **Standardized**: Provides consistent training/test protocol for fair method comparison
+1. **Large Scale**: Over 19,000 total samples across all splits
+2. **Natural Language**: Real referring expressions collected from human annotators
+3. **Challenging**: Complex scenes with multiple similar objects requiring disambiguation
+4. **Multimodal**: Requires joint understanding of visual and linguistic context
+5. **Well-Established**: Widely used benchmark in vision-language research
 
 ### Recommended Usage
 
-For this project:
-- Use **DUTS-TR** as the source for train/val/test splits
-- Default split: 2,000 train / 500 val / 500 test (configurable)
-- Remaining images can be used for additional experiments
+For this project with $10 budget constraint:
 
-## Alternative Datasets
+**Local Debugging (MPS - FREE):**
+- Split: `val`
+- max_samples: 500-1000
+- Purpose: Quick iteration and debugging
 
-If DUTS is unavailable, the following alternatives can be used:
+**Runpod Training (GPU - $3-9):**
+- Split: `val` (use for training)
+- max_samples: 5000-15000 depending on budget
+- Evaluation: Use `test` split for final metrics
 
-### MSRA-B
-- ~2,500 images
-- Note: Some official download links may be unavailable
-- Smaller but sufficient for initial experiments
+**Split Strategy:**
+- **Training**: Use `val` split (8,811 samples)
+- **Evaluation**: Use `test` split (5,000 samples)
+- **Optional**: Use `testA`/`testB` for detailed analysis
 
-### DUT-OMRON
-- ~5,000 images
-- Website: http://saliencydetection.net/dut-omron/
-- Good alternative with moderate size
+## Related Datasets
+
+The RefCOCO family includes three variants:
+
+### RefCOCO (this project)
+- Allows location words in expressions ("on the left", "in the back")
+- More natural referring expressions
+- Easier to learn spatial relationships
+
+### RefCOCO+
+- No location words allowed
+- Forces use of appearance descriptions
+- More challenging for models
+
+### RefCOCOg
+- Longer, more complex expressions (average 8.4 words)
+- More detailed descriptions
+- Google-style referring expressions
 
 ## Attribution Requirements
 
-When publishing work using this project and the DUTS dataset:
+When publishing work using this project and the RefCOCO dataset:
 
-1. **Cite the DUTS paper** (see BibTeX above)
-2. **Cite this project** (if using the code):
+1. **Cite the RefCOCO paper** (see BibTeX above)
+2. **Cite the MS COCO dataset** (images are from COCO):
    ```bibtex
-   @misc{qwen3-vl-bbox,
-     title={Qwen3-VL Main Subject Bounding Box Detection},
+   @inproceedings{lin2014coco,
+     title={Microsoft COCO: Common Objects in Context},
+     author={Lin, Tsung-Yi and Maire, Michael and Belongie, Serge and Hays, James and Perona, Pietro and Ramanan, Deva and Doll{\'a}r, Piotr and Zitnick, C Lawrence},
+     booktitle={European Conference on Computer Vision (ECCV)},
+     year={2014}
+   }
+   ```
+3. **Cite this project** (if using the code):
+   ```bibtex
+   @misc{qwen3-vl-refcoco,
+     title={Qwen3-VL Phrase Grounding with RefCOCO},
      author={Your Name},
      year={2025},
-     howpublished={\url{https://github.com/yourusername/qwen3-vl-bbox}}
+     howpublished={\url{https://github.com/yourusername/vlm-bounding-box}}
    }
    ```
 
+## Data Access
+
+RefCOCO is automatically downloaded from HuggingFace when you run the data preparation scripts. No manual download required!
+
+```bash
+python scripts/prepare_data.py --split val --visualize
+```
+
+The dataset will be cached in your HuggingFace cache directory (typically `~/.cache/huggingface/datasets/`).
+
 ## Questions or Issues
 
-For questions about the DUTS dataset itself, please contact the original authors or visit:
-http://saliencydetection.net/duts/
+For questions about the RefCOCO dataset itself, please visit:
+- HuggingFace: https://huggingface.co/datasets/lmms-lab/RefCOCO
+- Original repository: https://github.com/lichengunc/refer
 
-For questions about using DUTS with this project, please open an issue in this repository.
+For questions about using RefCOCO with this project, please open an issue in this repository.
 
 ---
 
-**Last Updated:** 2025-01-19
+**Last Updated:** 2025-01-20

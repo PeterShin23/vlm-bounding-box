@@ -1,43 +1,73 @@
-# Data configuration for saliency-based main subject detection
+# Data configuration for RefCOCO phrase grounding
 
-# Dataset paths
-data:
-  # Root directory for raw data
-  # Using DUTS-TR dataset (Wang et al., CVPR 2017)
-  # See CITATIONS.md for full citation and download instructions
-  raw_data_dir: "data/raw/duts-tr"
+# RefCOCO dataset from HuggingFace
+dataset:
+  # HuggingFace dataset name
+  name: "lmms-lab/RefCOCO"
 
-  # Processed data directory (contains train.json, val.json, test.json)
-  processed_data_dir: "data/processed"
+  # RefCOCO variant: "refcoco", "refcoco+", or "refcocog"
+  # - refcoco: Original dataset
+  # - refcoco+: No location words in expressions
+  # refcocog: Longer, more complex expressions
+  variant: "refcoco"
 
-  # Image and mask subdirectories (relative to raw_data_dir)
-  image_subdir: "images"
-  mask_subdir: "masks"
+# Budget-aware sampling
+# Set to null to use all available data, or specify a number to limit
+sampling:
+  # Training samples
+  max_train_samples: null  # null = all, or set to 5000, 10000, etc.
 
-  # File suffixes
-  image_suffix: ".jpg"
-  mask_suffix: ".png"
+  # Validation samples
+  max_val_samples: 2000
 
-# Split sizes
-splits:
-  train_size: 2000
-  val_size: 500
-  test_size: 500
-  seed: 42
+  # Test samples
+  max_test_samples: 2000
 
 # Data processing
 processing:
   # Image resize (shorter edge), set to null to disable
-  resize: 320
+  # Note: Qwen3-VL processor will handle final resizing
+  resize: null
 
   # Data augmentation for training
-  augment_train: true
+  # (Keep minimal for phrase grounding - bbox correspondence is critical)
+  augment_train: false
 
-  # Maximum samples for debugging (null = use all)
-  max_samples: null
-
-# DataLoader settings
+# DataLoader settings (for local MPS)
 dataloader:
   batch_size: 4
   num_workers: 0  # Use 0 for MPS compatibility
   pin_memory: false  # MPS doesn't support pin_memory
+  shuffle: true
+
+# Runpod overrides (for cloud GPU training)
+# These settings are used when --prefer_cuda flag is set
+runpod:
+  # Smaller batch size with gradient accumulation
+  # Effective batch size = batch_size * gradient_accumulation_steps
+  batch_size: 2
+  gradient_accumulation_steps: 4  # Effective: 8
+
+  # Can use more workers on GPU instances
+  num_workers: 2
+
+# Budget presets (copy these values to sampling.max_train_samples)
+budget_presets:
+  # Local debugging (free, ~10-20 min)
+  local_debug:
+    max_train_samples: 500
+    max_val_samples: 100
+    num_epochs: 1
+
+  # Runpod conservative (~$3-5, 3-6 hours)
+  runpod_conservative:
+    max_train_samples: 5000
+    max_val_samples: 1000
+    num_epochs: 2
+
+  # Runpod moderate (~$6-9, 8-12 hours)
+  runpod_moderate:
+    max_train_samples: 15000
+    max_val_samples: 2000
+    num_epochs: 2
+    max_steps: 5000  # Early stopping

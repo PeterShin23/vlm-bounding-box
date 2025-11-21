@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-Training script for fine-tuning Qwen3-VL on main subject detection.
+Training script for fine-tuning Qwen3-VL on RefCOCO phrase grounding.
 
 Usage:
-    python scripts/train.py --config configs/training.yaml
+    # Local debug (MPS)
+    python scripts/train.py --debug --max_train_samples 500
+
+    # Runpod training (CUDA)
+    python scripts/train.py --prefer_cuda --max_train_samples 5000 --num_epochs 2
 """
 import argparse
 from pathlib import Path
@@ -15,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.common.device import get_device, get_device_name
 from src.common.paths import ProjectPaths
-from src.data.saliency_dataset import SaliencyMainSubjectDataset, create_dataloader
+from src.data.refcoco_dataset import create_refcoco_dataloader
 from src.pipeline.model_qwen3 import load_qwen3_vl_with_lora
 from src.pipeline.training import Trainer
 
@@ -37,7 +41,7 @@ def collate_fn(batch):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train Qwen3-VL on bounding box detection")
+    parser = argparse.ArgumentParser(description="Train Qwen3-VL on RefCOCO phrase grounding")
     parser.add_argument(
         "--config",
         type=Path,
@@ -51,11 +55,6 @@ def main():
         help="Path to data config file"
     )
     parser.add_argument(
-        "--processed_data_dir",
-        type=Path,
-        help="Override processed data directory from config"
-    )
-    parser.add_argument(
         "--output_dir",
         type=Path,
         help="Override output directory from config"
@@ -63,7 +62,27 @@ def main():
     parser.add_argument(
         "--debug",
         action="store_true",
-        help="Debug mode (use small subset of data)"
+        help="Debug mode (use small subset of data, 1 epoch)"
+    )
+    parser.add_argument(
+        "--prefer_cuda",
+        action="store_true",
+        help="Prefer CUDA over MPS (for Runpod training)"
+    )
+    parser.add_argument(
+        "--max_train_samples",
+        type=int,
+        help="Maximum training samples (for budget-aware training)"
+    )
+    parser.add_argument(
+        "--num_epochs",
+        type=int,
+        help="Override number of epochs"
+    )
+    parser.add_argument(
+        "--max_steps",
+        type=int,
+        help="Maximum training steps (early stopping)"
     )
 
     args = parser.parse_args()
@@ -74,15 +93,22 @@ def main():
     data_config = load_config(args.data_config)
 
     # Override configs from CLI args
-    if args.processed_data_dir:
-        data_config["data"]["processed_data_dir"] = str(args.processed_data_dir)
     if args.output_dir:
         train_config["logging"]["output_dir"] = str(args.output_dir)
+    if args.num_epochs:
+        train_config["training"]["num_epochs"] = args.num_epochs
+    if args.max_steps:
+        train_config["training"]["max_steps"] = args.max_steps
+
+    # Determine max samples
+    max_train_samples = args.max_train_samples or data_config["sampling"].get("max_train_samples")
+    max_val_samples = data_config["sampling"].get("max_val_samples")
 
     # Debug mode: reduce data and epochs
     if args.debug:
         print("\n*** DEBUG MODE ENABLED ***")
-        data_config["processing"]["max_samples"] = 100
+        max_train_samples = 100
+        max_val_samples = 50
         train_config["training"]["num_epochs"] = 1
         data_config["dataloader"]["batch_size"] = 2
 
@@ -90,55 +116,40 @@ def main():
     paths = ProjectPaths()
     paths.create_directories()
 
-    processed_dir = Path(data_config["data"]["processed_data_dir"])
+    # Get device (with CUDA preference for Runpod)
+    device = get_device(prefer_cuda=args.prefer_cuda)
+    print(f"\nUsing device: {get_device_name(prefer_cuda=args.prefer_cuda)}")
 
-    # Check if processed data exists
-    if not (processed_dir / "train.json").exists():
-        print(f"\nError: Processed data not found at {processed_dir}")
-        print("Please run data preparation first:")
-        print("  python scripts/prepare_data.py --data_dir /path/to/dataset")
-        sys.exit(1)
+    # Load RefCOCO datasets
+    # IMPORTANT: RefCOCO uses "val" split for TRAINING and "test" split for EVALUATION
+    print("\nLoading RefCOCO dataset...")
+    print(f"NOTE: Using 'val' split for TRAINING (RefCOCO has no 'train' split)")
 
-    # Get device
-    device = get_device()
-    print(f"\nUsing device: {get_device_name()}")
+    # Get device string for dataloader optimization
+    device_str = device.type
 
-    # Load datasets
-    print("\nLoading datasets...")
-
-    train_dataset = SaliencyMainSubjectDataset(
-        split_json_path=processed_dir / "train.json",
-        resize=data_config["processing"].get("resize"),
-        augment=data_config["processing"].get("augment_train", False),
-        max_samples=data_config["processing"].get("max_samples")
-    )
-
-    val_dataset = SaliencyMainSubjectDataset(
-        split_json_path=processed_dir / "val.json",
-        resize=data_config["processing"].get("resize"),
-        augment=False,
-        max_samples=data_config["processing"].get("max_samples")
-    )
-
-    print(f"Train samples: {len(train_dataset)}")
-    print(f"Val samples: {len(val_dataset)}")
-
-    # Create dataloaders
-    train_loader = create_dataloader(
-        train_dataset,
+    train_loader = create_refcoco_dataloader(
+        split="val",  # TRAINING data
         batch_size=data_config["dataloader"]["batch_size"],
         shuffle=True,
-        num_workers=data_config["dataloader"].get("num_workers", 0),
-        collate_fn=collate_fn
+        num_workers=data_config["dataloader"].get("num_workers"),  # None = auto-select
+        max_samples=max_train_samples,
+        collate_fn=collate_fn,
+        device=device_str  # Pass device for optimization
     )
 
-    val_loader = create_dataloader(
-        val_dataset,
+    val_loader = create_refcoco_dataloader(
+        split="test",  # VALIDATION/EVALUATION data
         batch_size=data_config["dataloader"]["batch_size"],
         shuffle=False,
-        num_workers=data_config["dataloader"].get("num_workers", 0),
-        collate_fn=collate_fn
+        num_workers=data_config["dataloader"].get("num_workers"),  # None = auto-select
+        max_samples=max_val_samples,
+        collate_fn=collate_fn,
+        device=device_str  # Pass device for optimization
     )
+
+    print(f"Train samples: {len(train_loader.dataset)}")
+    print(f"Val samples: {len(val_loader.dataset)}")
 
     # Load model
     print("\nLoading model...")

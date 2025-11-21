@@ -1,4 +1,4 @@
-# Training configuration for Qwen3-VL fine-tuning
+# Training configuration for Qwen3-VL on RefCOCO phrase grounding
 
 # Model configuration
 model:
@@ -9,7 +9,7 @@ model:
   # name: "Qwen/Qwen3-VL-2B-Instruct-FP8"
 
   # Quantization settings (for QLoRA)
-  use_quantization: false  # Set to false for MPS (Mac M-series)
+  use_quantization: false  # Set to false for MPS (Mac M-series), true for CUDA/Runpod
   quantization_bits: 4  # 4 or 8 (only used if use_quantization=true)
 
 # LoRA configuration
@@ -33,6 +33,10 @@ training:
   # Number of epochs
   num_epochs: 3
 
+  # Maximum training steps (null = train for full num_epochs)
+  # Use this for early stopping on Runpod to control costs
+  max_steps: null  # Example: 5000 for budget-aware training
+
   # Learning rate
   learning_rate: 2.0e-4
 
@@ -40,6 +44,7 @@ training:
   batch_size: 4
 
   # Gradient accumulation steps
+  # For Runpod with smaller batches: use batch_size=2, gradient_accumulation_steps=4
   gradient_accumulation_steps: 2
 
   # Warmup steps
@@ -48,8 +53,12 @@ training:
   # Maximum gradient norm for clipping
   max_grad_norm: 1.0
 
-  # Mixed precision training (set to null for MPS)
+  # Mixed precision training (set to null for MPS, "bf16" for A100/H100)
   mixed_precision: null  # Options: "fp16", "bf16", null
+
+  # Device preference (set via CLI --prefer_cuda for Runpod)
+  # This setting can be overridden at runtime
+  prefer_cuda: false  # Set to true on Runpod GPU instances
 
 # Logging and checkpointing
 logging:
@@ -84,7 +93,14 @@ evaluation:
 # Device settings
 device:
   # Device type: "mps" (Mac M-series), "cuda" (NVIDIA GPU), "cpu"
+  # This is overridden by --prefer_cuda CLI flag
   type: "mps"
 
   # Maximum memory per device (optional, for multi-GPU)
   max_memory: null
+
+# RefCOCO-specific notes:
+# - Use 'val' split for TRAINING (8,811 samples)
+# - Use 'test' split for EVALUATION (5,000 samples)
+# - Control training samples with --max_train_samples CLI arg
+# - For budget-aware Runpod training, set max_steps to limit total steps

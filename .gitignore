@@ -37,14 +37,10 @@ ENV/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# Data directories
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-data/downloads/*
-!data/downloads/.gitkeep
-!data/downloads/README.md
+# Data directories - RefCOCO images
+data/refcoco/*/images/
+data/refcoco/*/metadata.json
+!data/README.md
 
 # Outputs
 outputs/checkpoints/*

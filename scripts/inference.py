@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Inference script for running predictions on single images.
+Inference script for RefCOCO phrase grounding - predict bounding boxes from referring expressions.
 
 Usage:
-    python scripts/inference.py --image path/to/image.jpg --checkpoint outputs/checkpoints/final
+    python scripts/inference.py \
+        --image path/to/image.jpg \
+        --phrase "the red car on the left" \
+        --checkpoint outputs/checkpoints/final
 """
 import argparse
 from pathlib import Path
@@ -16,12 +19,20 @@ from src.pipeline.inference import load_model_and_predict
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run inference on a single image")
+    parser = argparse.ArgumentParser(
+        description="Run RefCOCO phrase grounding inference on a single image"
+    )
     parser.add_argument(
         "--image",
         type=Path,
         required=True,
         help="Path to input image"
+    )
+    parser.add_argument(
+        "--phrase",
+        type=str,
+        required=True,
+        help="Referring expression (e.g., 'the red car on the left', 'person wearing blue shirt')"
     )
     parser.add_argument(
         "--checkpoint",
@@ -57,6 +68,7 @@ def main():
     # Run prediction
     result = load_model_and_predict(
         image_path=args.image,
+        phrase=args.phrase,
         checkpoint_path=args.checkpoint,
         model_name=args.model,
         device=args.device,

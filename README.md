@@ -1,6 +1,6 @@
-# Qwen3-VL Main Subject Bounding Box Detection
+# Qwen3-VL Phrase Grounding (RefCOCO)
 
-A focused multimodal fine-tuning project that fine-tunes **Qwen3-VL-2B** to predict JSON bounding boxes around the main subject in images.
+A focused multimodal fine-tuning project that fine-tunes **Qwen3-VL-2B** to predict JSON bounding boxes for objects described by natural language phrases.
 
 ## Project Overview
 
@@ -8,15 +8,17 @@ This project demonstrates end-to-end VLM (Vision-Language Model) fine-tuning usi
 
 - **Model**: Qwen3-VL-2B-Instruct
 - **Fine-tuning method**: LoRA/QLoRA for efficient training
-- **Task**: Predict normalized bounding box coordinates (JSON) for the main salient subject
-- **Dataset**: DUTS saliency detection dataset (recommended) or alternatives (MSRA-B, DUT-OMRON)
-- **Platform**: Mac M-series (M4 Max, 36GB) with MPS acceleration
+- **Task**: Referring expression grounding (phrase-conditional bounding box prediction)
+- **Dataset**: RefCOCO from HuggingFace (`lmms-lab/RefCOCO`)
+- **Platform**: Mac M-series (M4 Max, 36GB) with MPS for debugging + Runpod GPU for training
 
 ### Learning Goals
 
 - End-to-end LLM/VLM fine-tuning with LoRA
-- Multimodal prompting (image + instruction → text)
+- Multimodal prompting (image + phrase → bounding box)
+- Referring expression grounding
 - Evaluation metrics for spatial predictions (IoU)
+- Budget-aware cloud GPU training
 - Production-ready project structure
 
 ## Repository Structure
@@ -24,35 +26,32 @@ This project demonstrates end-to-end VLM (Vision-Language Model) fine-tuning usi
 ```
 vlm-bounding-box/
 ├── configs/
-│   ├── data.yaml          # Dataset configuration
+│   ├── data.yaml          # RefCOCO dataset configuration
 │   └── training.yaml      # Training hyperparameters
 ├── src/
 │   ├── common/
-│   │   ├── device.py      # MPS/CPU device selection
+│   │   ├── device.py      # MPS/CUDA/CPU device selection
 │   │   ├── paths.py       # Path management
 │   │   └── viz.py         # Visualization utilities
 │   ├── data/
-│   │   ├── box_utils.py   # Bbox operations, IoU, JSON conversion
-│   │   ├── saliency_dataset.py  # PyTorch dataset
-│   │   └── split_utils.py       # Train/val/test splitting
+│   │   ├── box_utils.py        # Bbox operations, COCO format, IoU, JSON conversion
+│   │   └── refcoco_dataset.py  # RefCOCO PyTorch dataset
 │   └── pipeline/
-│       ├── prompts.py     # Instruction templates
+│       ├── prompts.py     # Phrase-conditional instruction templates
 │       ├── model_qwen3.py # Model loading + LoRA setup
 │       ├── training.py    # Training loop
 │       ├── eval.py        # Evaluation with IoU metrics
-│       └── inference.py   # Single-image prediction
+│       └── inference.py   # Single-image + phrase prediction
 ├── scripts/
-│   ├── prepare_data.py    # Dataset preparation
-│   ├── train.py           # Training script
+│   ├── prepare_data.py    # RefCOCO data inspection and visualization
+│   ├── train.py           # Training script (local MPS + Runpod)
 │   ├── evaluate.py        # Evaluation script
 │   └── inference.py       # Inference script
-├── data/
-│   ├── raw/               # Raw datasets
-│   └── processed/         # Processed splits
 ├── outputs/
 │   ├── checkpoints/       # Model checkpoints
 │   ├── logs/              # Training logs
 │   └── visualizations/    # Sample visualizations
+├── MIGRATION_REFCOCO.md   # Migration guide (DUTS → RefCOCO)
 ├── requirements.txt
 └── README.md
 ```
@@ -86,82 +85,78 @@ pip install -r requirements.txt
 
 ## Quick Start
 
-### Step 1: Download Dataset
+### Step 1: Inspect RefCOCO Dataset
 
-Get dataset download instructions:
+RefCOCO is loaded automatically from HuggingFace - no manual download required!
 
-```bash
-python3 scripts/prepare_data.py --download_help
-```
-
-Recommended dataset:
-
-- **DUTS (recommended)**: 10,553 training images, high quality, actively maintained
-  - Download: http://saliencydetection.net/duts/
-  - Direct link: http://saliencydetection.net/duts/download/DUTS-TR.zip (~800MB)
-  - See [CITATIONS.md](CITATIONS.md) for proper attribution
-
-Alternative datasets:
-- **MSRA-B**: ~2,500 images (note: some download links may be broken)
-- **DUT-OMRON**: ~5,000 images
-
-After downloading and extracting, organize to get this structure:
-
-```
-/path/to/dataset/
-  images/
-    img1.jpg
-    img2.jpg
-    ...
-  masks/
-    img1.png
-    img2.png
-    ...
-```
-
-### Step 2: Prepare Data
-
-Process the raw dataset and create train/val/test splits:
+Inspect the dataset and create visualizations:
 
 ```bash
-python3 scripts/prepare_data.py \
-    --data_dir /path/to/dataset \
-    --output_dir data/processed \
-    --train_size 2000 \
-    --val_size 500 \
-    --test_size 500 \
-    --visualize
+python3 scripts/prepare_data.py --split val --num_samples 5 --visualize
 ```
+
+**IMPORTANT - RefCOCO Split Strategy:**
+- **`val` split (8,811 samples)**: Use this for **training**
+- **`test` split (5,000 samples)**: Use this for **final evaluation**
+- **`testA`** (1,975 samples): People subset (optional evaluation)
+- **`testB`** (1,810 samples): Objects subset (optional evaluation)
+
+⚠️ **There is NO "train" split in RefCOCO - use "val" for training!**
 
 This will:
+- Load RefCOCO from HuggingFace
+- Show sample images, phrases, and bounding boxes
+- Generate visualizations in `outputs/visualizations/`
+- Display budget recommendations for training
 
-- Compute bounding boxes from saliency masks
-- Create train/val/test splits
-- Save processed data to `data/processed/`
-- Generate sample visualizations in `outputs/visualizations/`
+### Step 2: Verify Data Loading
+
+Test that all splits load correctly:
+
+```bash
+python3 scripts/prepare_data.py --test
+```
+
+This validates data integrity and shows dataset statistics.
 
 ### Step 3: Train the Model
 
-Start fine-tuning:
+**Local Debugging (FREE - MPS on Mac):**
+
+Quick iteration with a small subset:
 
 ```bash
-python3 scripts/train.py --config configs/training.yaml
+python3 scripts/train.py --debug --max_train_samples 500
 ```
 
-For quick debugging with a small subset:
+**Runpod Training (GPU - Budget-Aware):**
+
+For the main training run under $10 budget:
 
 ```bash
-python3 scripts/train.py --debug
+# Conservative budget (~$3-5, L4/A10G GPU, 3-6 hours)
+python3 scripts/train.py \
+    --prefer_cuda \
+    --max_train_samples 5000 \
+    --num_epochs 2
+
+# Moderate budget (~$6-9, RTX 3090, 8-12 hours)
+python3 scripts/train.py \
+    --prefer_cuda \
+    --max_train_samples 15000 \
+    --num_epochs 2 \
+    --max_steps 5000
 ```
 
 Training outputs:
-
 - Checkpoints: `outputs/checkpoints/`
 - Logs: `outputs/logs/training_history.json`
 
+See `configs/data.yaml` for budget preset configurations.
+
 ### Step 4: Evaluate
 
-Evaluate the trained model on the test set:
+Evaluate the trained model on the **test split** (5,000 samples):
 
 ```bash
 python scripts/evaluate.py \
@@ -170,7 +165,6 @@ python scripts/evaluate.py \
 ```
 
 This will report:
-
 - Mean IoU (Intersection over Union)
 - Success rate at IoU ≥ 0.5
 - Success rate at IoU ≥ 0.75
@@ -178,11 +172,12 @@ This will report:
 
 ### Step 5: Run Inference
 
-Predict bounding box on a single image:
+Predict bounding box given an image and phrase:
 
 ```bash
 python3 scripts/inference.py \
     --image /path/to/image.jpg \
+    --phrase "the red car on the left" \
     --checkpoint outputs/checkpoints/final \
     --output outputs/predictions/result.png
 ```
@@ -263,15 +258,13 @@ For Mac M-series:
 
 ## How It Works
 
-### Task Definition
+### Task Definition: Referring Expression Grounding
 
 **Input**:
-
 - An RGB image
-- Fixed instruction: "Find the main subject and output a JSON bounding box"
+- A natural language phrase describing an object/region (e.g., "the red car on the left", "person wearing blue shirt")
 
 **Output**:
-
 ```json
 {
   "x_min": 0.13,
@@ -281,16 +274,20 @@ For Mac M-series:
 }
 ```
 
-All coordinates are normalized to [0, 1].
+All coordinates are normalized to [0, 1], representing the bounding box for the described region.
 
 ### Training Process
 
-1. **Data**: Load image + saliency mask
-2. **Ground Truth**: Compute bounding box from mask (largest connected component)
-3. **Prompt**: Format as Qwen3-VL chat message with image + instruction
-4. **Target**: JSON string of normalized coordinates
-5. **Loss**: Standard next-token cross-entropy on JSON tokens only (prompt masked with -100)
-6. **Optimization**: LoRA adapters updated, base model frozen
+1. **Data**: Load image + referring expression (phrase) + ground truth bbox from RefCOCO
+2. **Prompt**: Format as Qwen3-VL chat message with image + phrase-conditional instruction
+3. **Target**: JSON string of normalized bounding box coordinates
+4. **Loss**: Standard next-token cross-entropy on JSON tokens only (prompt masked with -100)
+5. **Optimization**: LoRA adapters updated, base model frozen
+
+**Example:**
+- **Image**: Photo of a street scene
+- **Phrase**: "the red car on the left"
+- **Model Output**: `{"x_min": 0.12, "y_min": 0.35, "x_max": 0.48, "y_max": 0.72}`
 
 ### Evaluation Metrics
 
@@ -431,9 +428,9 @@ If you use this code for your projects or research:
 - **PEFT Library**: https://github.com/huggingface/peft
 
 ### Datasets
-- **DUTS Dataset**: Lijun Wang, Huchuan Lu, Yifan Wang, Mengyang Feng, Dong Wang, Baocai Yin, Xiang Ruan. "Learning to Detect Salient Objects with Image-level Supervision", CVPR 2017.
-  - Website: http://saliencydetection.net/duts/
-  - See [CITATIONS.md](CITATIONS.md) for full BibTeX citation and copyright information
+- **RefCOCO Dataset**: Licheng Yu, Patrick Poirson, Shan Yang, Alexander C. Berg, Tamara L. Berg. "Modeling Context in Referring Expressions", ECCV 2016.
+  - HuggingFace: https://huggingface.co/datasets/lmms-lab/RefCOCO
+  - See [CITATIONS.md](CITATIONS.md) for full BibTeX citation and dataset information
 
 ## License
 
@@ -442,9 +439,9 @@ MIT License - see LICENSE file for details.
 ## Acknowledgments
 
 - Qwen team for the excellent VLM models
-- HuggingFace for transformers and PEFT libraries
-- DUTS dataset authors (Wang et al., CVPR 2017) for the high-quality saliency dataset
-- All saliency detection dataset creators (MSRA, DUT, DUTS, etc.)
+- HuggingFace for transformers, PEFT, and datasets libraries
+- RefCOCO dataset authors (Yu et al., ECCV 2016) for the referring expression grounding dataset
+- lmms-lab for maintaining the RefCOCO dataset on HuggingFace
 
 ---
 

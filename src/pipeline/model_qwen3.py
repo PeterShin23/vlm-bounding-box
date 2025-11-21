@@ -29,7 +29,7 @@ def load_qwen3_vl_with_lora(
     lora_alpha: int = 32,
     lora_dropout: float = 0.05,
     target_modules: Optional[list] = None,
-    device: str = "mps",
+    device: str | torch.device = "mps",
     max_memory: Optional[Dict] = None
 ) -> Tuple[Any, Any]:
     """
@@ -49,7 +49,7 @@ def load_qwen3_vl_with_lora(
         lora_dropout: Dropout rate for LoRA layers
         target_modules: List of module names to apply LoRA to.
                        If None, uses default for Qwen models
-        device: Device to load model on ('mps', 'cpu', 'cuda')
+        device: Device to load model on ('mps', 'cpu', 'cuda', or torch.device object)
         max_memory: Optional dict specifying max memory per device
 
     Returns:
@@ -63,7 +63,11 @@ def load_qwen3_vl_with_lora(
     - Language model generates text conditioned on vision + text
     - We apply LoRA primarily to language model attention layers
     """
+    # Normalize device to string for comparisons
+    device_str = device if isinstance(device, str) else device.type
+
     print(f"Loading Qwen3-VL model: {model_name}")
+    print(f"Device: {device_str}")
     print(f"Quantization: {use_quantization} ({quantization_bits}-bit)")
     print(f"LoRA config: r={lora_r}, alpha={lora_alpha}, dropout={lora_dropout}")
 
@@ -82,10 +86,10 @@ def load_qwen3_vl_with_lora(
     quantization_config = None
     if use_quantization:
         # Note: BitsAndBytes may not work well with MPS
-        # For Mac M-series, we might need to fall back to full precision
-        if device == "mps":
+        # For Mac M-series, we fall back to full precision
+        if device_str == "mps":
             print("Warning: Quantization not well supported on MPS. Using full precision.")
-            print("For memory constraints, consider using the FP8 model variant instead.")
+            print("For memory constraints on MPS, use model='Qwen/Qwen3-VL-2B-Instruct-FP8'")
             use_quantization = False
         else:
             quantization_config = BitsAndBytesConfig(
@@ -101,13 +105,13 @@ def load_qwen3_vl_with_lora(
     # ====================
     model_kwargs = {
         "trust_remote_code": True,
-        "torch_dtype": torch.float16 if device != "mps" else torch.float32,
+        "torch_dtype": torch.float16 if device_str != "mps" else torch.float32,
     }
 
     if quantization_config is not None:
         model_kwargs["quantization_config"] = quantization_config
 
-    if device == "mps":
+    if device_str == "mps":
         # For MPS, we load on CPU first then move to MPS
         # This avoids some compatibility issues
         model_kwargs["device_map"] = None
@@ -123,8 +127,8 @@ def load_qwen3_vl_with_lora(
     )
 
     # Move to device if using MPS
-    if device == "mps":
-        model = model.to(device)
+    if device_str == "mps":
+        model = model.to(device_str)
 
     # ====================
     # 4. Prepare for k-bit training (if quantized)
@@ -172,7 +176,7 @@ def load_qwen3_vl_with_lora(
     # Print trainable parameters
     model.print_trainable_parameters()
 
-    print(f"\nModel loaded successfully on {device}")
+    print(f"\nModel loaded successfully on {device_str}")
     print(f"Model type: {type(model)}")
 
     return model, processor

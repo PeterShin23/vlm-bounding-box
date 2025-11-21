@@ -46,10 +46,20 @@ def draw_bbox_on_image(
 
     # Draw label if provided
     if label:
-        # Try to use a font, fall back to default if not available
-        try:
-            font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 16)
-        except:
+        # Try to use a platform-specific font, fall back to default if not available
+        font_paths = [
+            "/System/Library/Fonts/Helvetica.ttc",  # macOS
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",  # Linux
+            "C:\\Windows\\Fonts\\arial.ttf",  # Windows
+        ]
+        font = None
+        for font_path in font_paths:
+            try:
+                font = ImageFont.truetype(font_path, 16)
+                break
+            except (OSError, IOError):
+                continue
+        if font is None:
             font = ImageFont.load_default()
 
         # Get text bounding box for background

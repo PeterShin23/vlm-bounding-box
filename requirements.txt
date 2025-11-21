@@ -8,6 +8,7 @@ torchvision>=0.15.0
 transformers>=4.37.0
 accelerate>=0.25.0
 peft>=0.7.0
+datasets>=2.14.0  # For loading RefCOCO from HuggingFace
 
 # For quantization (may not work well on MPS, but included for compatibility)
 bitsandbytes>=0.41.0

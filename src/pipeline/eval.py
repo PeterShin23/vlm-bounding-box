@@ -1,5 +1,5 @@
 """
-Evaluation module for bounding box detection with IoU metrics.
+Evaluation module for RefCOCO phrase grounding with IoU metrics.
 """
 import torch
 from torch.utils.data import DataLoader
@@ -10,7 +10,7 @@ from typing import Dict, List, Optional, Any, Tuple
 import numpy as np
 
 from ..data.box_utils import bbox_iou, json_to_bbox, extract_json_from_text
-from .prompts import build_main_subject_prompt
+from .prompts import build_grounding_prompt
 
 
 class Evaluator:
@@ -47,13 +47,15 @@ class Evaluator:
     def predict_bbox(
         self,
         image,
+        phrase: str,
         return_raw_text: bool = True
     ) -> Tuple[Optional[Tuple[float, float, float, float]], str]:
         """
-        Predict bounding box for a single image.
+        Predict bounding box for a single image given a referring expression phrase.
 
         Args:
             image: PIL Image
+            phrase: Referring expression (e.g., "the red car on the left")
             return_raw_text: Whether to return raw generated text
 
         Returns:
@@ -61,8 +63,8 @@ class Evaluator:
             - bbox_norm: Normalized bbox (x_min, y_min, x_max, y_max) or None if parsing failed
             - raw_text: Raw generated text
         """
-        # Build prompt
-        prompt = build_main_subject_prompt()
+        # Build phrase-conditional prompt
+        prompt = build_grounding_prompt(phrase)
 
         # Format messages
         messages = [
@@ -164,7 +166,8 @@ class Evaluator:
                 break
 
             images = batch["image"]
-            gt_boxes = batch["gt_box_norm"]
+            phrases = batch["phrase"]
+            gt_boxes = batch["bbox_norm"]
             widths = batch["width"]
             heights = batch["height"]
 
@@ -174,10 +177,11 @@ class Evaluator:
                     break
 
                 image = images[i]
+                phrase = phrases[i]
                 gt_box = gt_boxes[i]
 
-                # Predict
-                pred_box, raw_text = self.predict_bbox(image, return_raw_text=True)
+                # Predict with phrase
+                pred_box, raw_text = self.predict_bbox(image, phrase, return_raw_text=True)
 
                 # Check if parsing succeeded
                 if pred_box is None:

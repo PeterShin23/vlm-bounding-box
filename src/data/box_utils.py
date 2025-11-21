@@ -1,11 +1,38 @@
 """
-Bounding box utilities for converting masks to boxes, normalization, and IoU computation.
+Bounding box utilities for RefCOCO grounding task.
+
+Supports:
+- COCO format conversion ([x, y, w, h] → [x_min, y_min, x_max, y_max])
+- Normalization and denormalization
+- IoU computation
+- JSON serialization/parsing
 """
 import json
 import numpy as np
 import torch
 from typing import Tuple, Optional
 from scipy import ndimage
+
+
+def coco_to_xyxy(bbox_coco: Tuple[float, float, float, float]) -> Tuple[float, float, float, float]:
+    """
+    Convert COCO format bounding box to xyxy format.
+
+    COCO format: [x, y, w, h] where (x, y) is top-left corner
+    xyxy format: [x_min, y_min, x_max, y_max]
+
+    Args:
+        bbox_coco: COCO bbox as (x, y, width, height) in pixels
+
+    Returns:
+        Tuple of (x_min_px, y_min_px, x_max_px, y_max_px) in pixels
+    """
+    x, y, w, h = bbox_coco
+    x_min = x
+    y_min = y
+    x_max = x + w
+    y_max = y + h
+    return (float(x_min), float(y_min), float(x_max), float(y_max))
 
 
 def mask_to_largest_bbox(mask: np.ndarray | torch.Tensor) -> Tuple[int, int, int, int]:

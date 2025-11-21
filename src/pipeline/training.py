@@ -1,5 +1,5 @@
 """
-Training loop for fine-tuning Qwen3-VL on main subject bounding box detection.
+Training loop for fine-tuning Qwen3-VL on RefCOCO phrase grounding.
 """
 import torch
 from torch.utils.data import DataLoader
@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Optional, Any
 import time
 
-from .prompts import build_main_subject_prompt
+from .prompts import build_grounding_prompt
 
 
 class Trainer:
@@ -106,33 +106,36 @@ class Trainer:
 
     def prepare_batch(self, batch: Dict) -> Dict:
         """
-        Prepare a batch for training with Qwen3-VL.
+        Prepare a batch for training with Qwen3-VL on RefCOCO phrase grounding.
 
         This function:
-        1. Formats images and text into Qwen3-VL's expected format
-        2. Tokenizes inputs and targets
-        3. Creates labels with -100 for prompt tokens (ignored in loss)
+        1. Extracts phrases from batch (different for each sample)
+        2. Formats images, phrases, and text into Qwen3-VL's expected format
+        3. Tokenizes inputs and targets
+        4. Creates labels with -100 for prompt tokens (ignored in loss)
 
         Args:
-            batch: Dictionary with 'image', 'gt_box_json' keys
+            batch: Dictionary with 'image', 'phrase', 'bbox_json' keys
 
         Returns:
             Dictionary with processed inputs ready for model
         """
         images = batch["image"]
-        gt_box_jsons = batch["gt_box_json"]
+        phrases = batch["phrase"]  # Extract phrases (referring expressions)
+        bbox_jsons = batch["bbox_json"]  # Ground truth bboxes
         batch_size = len(images)
-
-        # Build prompt (same for all examples)
-        prompt = build_main_subject_prompt()
 
         # Prepare messages for each example
         # Qwen3-VL expects a conversation format
+        # IMPORTANT: Each sample has a DIFFERENT phrase, so we build prompts individually
         all_inputs = []
 
         for i in range(batch_size):
+            # Build phrase-conditional prompt for this specific sample
+            prompt = build_grounding_prompt(phrases[i])
+
             # Format as conversation
-            # User message contains image + prompt
+            # User message contains image + phrase-specific prompt
             messages = [
                 {
                     "role": "user",
@@ -144,7 +147,7 @@ class Trainer:
                 {
                     "role": "assistant",
                     "content": [
-                        {"type": "text", "text": gt_box_jsons[i]}
+                        {"type": "text", "text": bbox_jsons[i]}
                     ]
                 }
             ]
@@ -158,7 +161,11 @@ class Trainer:
                 add_generation_prompt=False
             )
 
-            all_inputs.append({"text": text, "images": images[i]})
+            all_inputs.append({
+                "text": text,
+                "images": images[i],
+                "prompt": prompt  # Keep prompt for label masking
+            })
 
         # Process batch
         # The processor handles both image preprocessing and text tokenization
@@ -188,7 +195,7 @@ class Trainer:
 
             # Tokenize just the prompt to find its length
             prompt_only = self.processor.apply_chat_template(
-                [{"role": "user", "content": [{"type": "text", "text": prompt}]}],
+                [{"role": "user", "content": [{"type": "text", "text": all_inputs[i]["prompt"]}]}],
                 tokenize=True,
                 add_generation_prompt=True
             )
