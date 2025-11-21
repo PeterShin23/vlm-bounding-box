@@ -9,7 +9,7 @@ This module handles:
 import torch
 from transformers import (
     AutoProcessor,
-    AutoModelForCausalLM,
+    Qwen3VLForConditionalGeneration,
     BitsAndBytesConfig
 )
 from peft import (
@@ -121,7 +121,8 @@ def load_qwen3_vl_with_lora(
     if max_memory is not None:
         model_kwargs["max_memory"] = max_memory
 
-    model = AutoModelForCausalLM.from_pretrained(
+    # Load Qwen3-VL model (vision-language model for conditional generation)
+    model = Qwen3VLForConditionalGeneration.from_pretrained(
         model_name,
         **model_kwargs
     )
@@ -165,7 +166,7 @@ def load_qwen3_vl_with_lora(
         target_modules=target_modules,
         lora_dropout=lora_dropout,
         bias="none",
-        task_type=TaskType.CAUSAL_LM,
+        task_type=TaskType.CAUSAL_LM,  # Qwen3-VL uses causal LM architecture internally
     )
 
     # ====================

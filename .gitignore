@@ -42,15 +42,15 @@ data/refcoco/*/images/
 data/refcoco/*/metadata.json
 !data/README.md
 
-# Outputs
-outputs/checkpoints/*
-!outputs/checkpoints/.gitkeep
-outputs/logs/*
-!outputs/logs/.gitkeep
-outputs/visualizations/*
-!outputs/visualizations/.gitkeep
-outputs/evaluations/*
-!outputs/evaluations/.gitkeep
+# Outputs - keep all training outputs local only
+outputs/
+logs/
+!outputs/.gitkeep
+!logs/.gitkeep
+
+# Keep only the README for documentation
+!outputs/README.md
+!logs/README.md
 
 # Model files
 *.bin

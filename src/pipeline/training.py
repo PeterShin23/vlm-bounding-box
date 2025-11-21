@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 from typing import Dict, Optional, Any
 import time
+from datetime import datetime
 
 from .prompts import build_grounding_prompt
 
@@ -187,22 +188,32 @@ class Trainer:
         # For each example, find where the assistant response starts
         # and mask everything before it with -100
         for i in range(batch_size):
-            # Find the assistant response start
-            # The processor should have a special token or we need to identify it
-            # For simplicity, we'll mask based on the prompt length
-            # This is a simplified approach - you may need to adjust based on
-            # Qwen3-VL's exact tokenization behavior
+            # FIXED: Find the actual assistant response start by searching for the bbox JSON
+            # We know the bbox JSON is what the assistant should output
+            target_text = bbox_jsons[i]
 
-            # Tokenize just the prompt to find its length
-            prompt_only = self.processor.apply_chat_template(
-                [{"role": "user", "content": [{"type": "text", "text": all_inputs[i]["prompt"]}]}],
-                tokenize=True,
-                add_generation_prompt=True
-            )
-            prompt_length = len(prompt_only)
+            # Tokenize the target to find its tokens
+            target_tokens = self.processor.tokenizer.encode(target_text, add_special_tokens=False)
 
-            # Mask prompt tokens
-            labels[i, :prompt_length] = -100
+            # Find where these tokens appear in the full sequence
+            input_ids_list = inputs["input_ids"][i].tolist()
+
+            # Search for the target token sequence in the input
+            assistant_start = None
+            for j in range(len(input_ids_list) - len(target_tokens) + 1):
+                if input_ids_list[j:j+len(target_tokens)] == target_tokens:
+                    assistant_start = j
+                    break
+
+            if assistant_start is not None:
+                # Mask everything BEFORE the assistant's response
+                labels[i, :assistant_start] = -100
+            else:
+                # Fallback: If we can't find the exact match, mask most of the sequence
+                # This shouldn't happen in normal cases but prevents training on garbage
+                # Mask all but the last 50 tokens (conservative estimate of bbox length)
+                labels[i, :-50] = -100
+                print(f"Warning: Could not find assistant response start for sample {i}, using fallback masking")
 
         inputs["labels"] = labels
 
@@ -296,7 +307,8 @@ class Trainer:
 
                 # Checkpointing
                 if self.save_steps and self.global_step % self.save_steps == 0:
-                    self.save_checkpoint(f"step_{self.global_step}")
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    self.save_checkpoint(f"checkpoint_{timestamp}_step{self.global_step}")
 
         return epoch_loss / num_batches
 
@@ -356,7 +368,8 @@ class Trainer:
                 self.evaluate()
 
             # Save checkpoint at end of epoch
-            self.save_checkpoint(f"epoch_{epoch + 1}")
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            self.save_checkpoint(f"checkpoint_{timestamp}_epoch{epoch + 1}")
 
         # Training complete
         end_time = time.time()
@@ -368,7 +381,8 @@ class Trainer:
         print("=" * 50)
 
         # Save final model
-        self.save_checkpoint("final")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.save_checkpoint(f"checkpoint_{timestamp}_final")
 
         # Save training history
         self.save_training_history()
