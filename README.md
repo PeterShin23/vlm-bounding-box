@@ -2,6 +2,12 @@
 
 A focused multimodal fine-tuning project that fine-tunes **Qwen3-VL-2B** to predict JSON bounding boxes for objects described by natural language phrases.
 
+## Demo Notebook
+
+You can view the full training/evaluations/examples here:
+
+[NBViewer link](https://nbviewer.org/github/PeterShin23/vlm-bounding-box/blob/main/notebooks/train_qwen3_refcoco.ipynb)
+
 ## Project Overview
 
 This project demonstrates end-to-end VLM (Vision-Language Model) fine-tuning using:
@@ -20,8 +26,3 @@ This project demonstrates end-to-end VLM (Vision-Language Model) fine-tuning usi
 - Evaluation metrics for spatial predictions (IoU)
 - Budget-aware cloud GPU training
 - Production-ready project structure
-
-## Demo Notebook
-You can view the full training/evaluations/examples here:
-
-[NBViewer link](https://nbviewer.org/github/PeterShin23/vlm-bounding-box/blob/main/notebooks/train_qwen3_refcoco.ipynb)
