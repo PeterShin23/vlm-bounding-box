@@ -4,9 +4,7 @@ A focused multimodal fine-tuning project that fine-tunes **Qwen3-VL-2B** to pred
 
 ## Demo Notebook
 
-You can view the full training/evaluations/examples here:
-
-[NBViewer link](https://nbviewer.org/github/PeterShin23/vlm-bounding-box/blob/main/notebooks/train_qwen3_refcoco.ipynb)
+You can view the full training/evaluations/examples here: [NBViewer link](https://nbviewer.org/github/PeterShin23/vlm-bounding-box/blob/main/notebooks/train_qwen3_refcoco.ipynb)
 
 ## Project Overview
 
