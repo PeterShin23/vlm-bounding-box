@@ -151,7 +151,12 @@ def main():
         splits = ["val", "test"]
         total = 0
         for split in splits:
-            count = export_split(split, args.output_dir, None, args.variant)
+            count = export_split(
+                split,
+                args.output_dir,
+                None,
+                args.variant,
+            )
             total += count
 
         print(f"\n{'=' * 70}")
@@ -169,7 +174,12 @@ def main():
         print(f"      └── metadata.json")
 
     elif args.split:
-        export_split(args.split, args.output_dir, args.max_samples, args.variant)
+        export_split(
+            args.split,
+            args.output_dir,
+            args.max_samples,
+            args.variant,
+        )
 
         print(f"\n{'=' * 70}")
         print(f"EXPORT COMPLETE!")

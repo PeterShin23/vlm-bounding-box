@@ -43,8 +43,8 @@ data/refcoco/*/metadata.json
 !data/README.md
 
 # Outputs - keep all training outputs local only
-outputs/
-logs/
+outputs/*
+logs/*
 !outputs/.gitkeep
 !logs/.gitkeep
 

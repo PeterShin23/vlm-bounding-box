@@ -1,0 +1,800 @@
+image_path,phrase,attempt,used_sampling,success,sanitized_bbox,parsed_bbox,raw_response
+base_sample_0,stipes on right,1,False,True,"[0.7, 0.0, 1.0, 1.0]","[0.7, 0.0, 1.0, 1.0]","```json
+{
+  ""x_min"": 0.7,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 1.0
+}
+```"
+base_sample_1,white cow next to the brown one,1,False,True,"[0.34, 0.44, 0.58, 0.65]","[0.34, 0.44, 0.58, 0.65]","```json
+{
+  ""x_min"": 0.34,
+  ""y_min"": 0.44,
+  ""x_max"": 0.58,
+  ""y_max"": 0.65
+}
+```"
+base_sample_2,cat,1,False,True,"[0.0, 0.0, 1.0, 1.0]","[0.0, 0.0, 1.0, 1.0]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 1.0
+}
+```"
+base_sample_3,right middle broccoli piece little grave dripping on plate,1,False,True,"[0.78, 0.18, 0.91, 0.45]","[0.78, 0.18, 0.91, 0.45]","```json
+{
+  ""x_min"": 0.78,
+  ""y_min"": 0.18,
+  ""x_max"": 0.91,
+  ""y_max"": 0.45
+}
+```"
+base_sample_4,MAN,1,False,True,"[0.28, 0.32, 0.68, 0.84]","[0.28, 0.32, 0.68, 0.84]","```json
+{
+  ""x_min"": 0.28,
+  ""y_min"": 0.32,
+  ""x_max"": 0.68,
+  ""y_max"": 0.84
+}
+```"
+base_sample_5,left big elephant,1,False,True,"[0.07, 0.07, 0.45, 0.85]","[0.07, 0.07, 0.45, 0.85]","```json
+{
+  ""x_min"": 0.07,
+  ""y_min"": 0.07,
+  ""x_max"": 0.45,
+  ""y_max"": 0.85
+}
+```"
+base_sample_6,whole poster actually,1,False,True,"[0.8, 0.0, 1.0, 0.8]","[0.8, 0.0, 1.0, 0.8]","```json
+{
+  ""x_min"": 0.8,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 0.8
+}
+```"
+base_sample_7,man in background,1,False,True,"[0.47, 0.0, 0.65, 0.65]","[0.47, 0.0, 0.65, 0.65]","```json
+{
+  ""x_min"": 0.47,
+  ""y_min"": 0.0,
+  ""x_max"": 0.65,
+  ""y_max"": 0.65
+}
+```"
+base_sample_8,"WHITE COW, FRONT MOST",1,False,True,"[0.34, 0.45, 0.62, 0.72]","[0.34, 0.45, 0.62, 0.72]","```json
+{
+  ""x_min"": 0.34,
+  ""y_min"": 0.45,
+  ""x_max"": 0.62,
+  ""y_max"": 0.72
+}
+```"
+base_sample_9,blue overalls man,1,False,True,"[0.84, 0.45, 0.95, 0.85]","[0.84, 0.45, 0.95, 0.85]","```json
+{
+  ""x_min"": 0.84,
+  ""y_min"": 0.45,
+  ""x_max"": 0.95,
+  ""y_max"": 0.85
+}
+```"
+base_sample_10,man sitting,1,False,True,"[0.62, 0.34, 0.78, 0.72]","[0.62, 0.34, 0.78, 0.72]","```json
+{
+  ""x_min"": 0.62,
+  ""y_min"": 0.34,
+  ""x_max"": 0.78,
+  ""y_max"": 0.72
+}
+```"
+base_sample_11,black laptop,1,False,True,"[0.0, 0.2, 0.6, 0.8]","[0.0, 0.2, 0.6, 0.8]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.2,
+  ""x_max"": 0.6,
+  ""y_max"": 0.8
+}
+```"
+base_sample_12,right full giraffe,1,False,True,"[0.65, 0.25, 0.78, 0.75]","[0.65, 0.25, 0.78, 0.75]","```json
+{
+  ""x_min"": 0.65,
+  ""y_min"": 0.25,
+  ""x_max"": 0.78,
+  ""y_max"": 0.75
+}
+```"
+base_sample_13,kid back blue shirt,1,False,True,"[0.22, 0.25, 0.5, 0.65]","[0.22, 0.25, 0.5, 0.65]","```json
+{
+  ""x_min"": 0.22,
+  ""y_min"": 0.25,
+  ""x_max"": 0.5,
+  ""y_max"": 0.65}
+```"
+base_sample_14,Cat on right,1,False,True,"[0.18, 0.22, 1.0, 0.82]","[0.18, 0.22, 1.0, 0.82]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.22,
+  ""x_max"": 1.0,
+  ""y_max"": 0.82
+}
+```"
+base_sample_15,batter,1,False,True,"[0.34, 0.41, 0.65, 0.82]","[0.34, 0.41, 0.65, 0.82]","```json
+{
+  ""x_min"": 0.34,
+  ""y_min"": 0.41,
+  ""x_max"": 0.65,
+  ""y_max"": 0.82
+}
+```"
+base_sample_16,man with brown shirt and hand on hip,1,False,True,"[0.22, 0.0, 0.45, 1.0]","[0.22, 0.0, 0.45, 1.0]","```json
+{
+  ""x_min"": 0.22,
+  ""y_min"": 0.0,
+  ""x_max"": 0.45,
+  ""y_max"": 1.0
+}
+```"
+base_sample_17,"picture of person with glasses, behind the screen",1,False,True,"[0.7, 0.0, 1.0, 0.8]","[0.7, 0.0, 1.0, 0.8]","```json
+{
+  ""x_min"": 0.7,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 0.8
+}
+```"
+base_sample_18,PIC BEHIND LAPTOP,1,False,True,"[0.4, 0.18, 0.6, 0.38]","[0.4, 0.18, 0.6, 0.38]","```json
+{
+  ""x_min"": 0.4,
+  ""y_min"": 0.18,
+  ""x_max"": 0.6,
+  ""y_max"": 0.38
+}
+```"
+base_sample_19,second donut in from front middle row,1,False,True,"[0.28, 0.18, 0.45, 0.34]","[0.28, 0.18, 0.45, 0.34]","```json
+{
+  ""x_min"": 0.28,
+  ""y_min"": 0.18,
+  ""x_max"": 0.45,
+  ""y_max"": 0.34
+}
+```"
+base_sample_20,boy in a red shirt,1,False,True,"[0.18, 0.25, 0.45, 0.65]","[0.18, 0.25, 0.45, 0.65]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.25,
+  ""x_max"": 0.45,
+  ""y_max"": 0.65
+}
+```"
+base_sample_21,left ele,1,False,True,"[0.0, 0.0, 0.5, 1.0]","[0.0, 0.0, 0.5, 1.0]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 0.5,
+  ""y_max"": 1.0
+}
+```"
+base_sample_22,guy with blue cup,1,False,True,"[0.68, 0.0, 1.0, 1.0]","[0.68, 0.0, 1.0, 1.0]","```json
+{
+  ""x_min"": 0.68,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 1.0
+}
+```"
+base_sample_23,baby one,1,False,True,"[0.45, 0.25, 0.95, 0.75]","[0.45, 0.25, 0.95, 0.75]","```json
+{
+  ""x_min"": 0.45,
+  ""y_min"": 0.25,
+  ""x_max"": 0.95,
+  ""y_max"": 0.75
+}
+```"
+base_sample_24,guy in brown shirt with his back to us,1,False,True,"[0.22, 0.0, 0.45, 1.0]","[0.22, 0.0, 0.45, 1.0]","```json
+{
+  ""x_min"": 0.22,
+  ""y_min"": 0.0,
+  ""x_max"": 0.45,
+  ""y_max"": 1.0
+}
+```"
+base_sample_25,boy in the middle,1,False,True,"[0.22, 0.31, 0.51, 0.65]","[0.22, 0.31, 0.51, 0.65]","```json
+{
+  ""x_min"": 0.22,
+  ""y_min"": 0.31,
+  ""x_max"": 0.51,
+  ""y_max"": 0.65
+}
+```"
+base_sample_26,broccoli near front with a little sauce on it,1,False,True,"[0.18, 0.18, 0.45, 0.45]","[0.18, 0.18, 0.45, 0.45]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.18,
+  ""x_max"": 0.45,
+  ""y_max"": 0.45
+}
+```"
+base_sample_27,cow in back of other,1,False,True,"[0.0, 0.22, 0.5, 0.82]","[0.0, 0.22, 0.5, 0.82]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.22,
+  ""x_max"": 0.5,
+  ""y_max"": 0.82
+}
+```"
+base_sample_28,batter,1,False,True,"[0.34, 0.41, 0.65, 0.82]","[0.34, 0.41, 0.65, 0.82]","```json
+{
+  ""x_min"": 0.34,
+  ""y_min"": 0.41,
+  ""x_max"": 0.65,
+  ""y_max"": 0.82
+}
+```"
+base_sample_29,guy petting elephant,1,False,True,"[0.15, 0.25, 0.67, 0.82]","[0.15, 0.25, 0.67, 0.82]","```json
+{
+  ""x_min"": 0.15,
+  ""y_min"": 0.25,
+  ""x_max"": 0.67,
+  ""y_max"": 0.82
+}
+```"
+base_sample_30,right guy black shirt,1,False,True,"[0.83, 0.38, 1.0, 0.85]","[0.83, 0.38, 1.0, 0.85]","```json
+{
+  ""x_min"": 0.83,
+  ""y_min"": 0.38,
+  ""x_max"": 1.0,
+  ""y_max"": 0.85
+}
+```"
+base_sample_31,hand on hip,1,False,True,"[0.25, 0.0, 0.45, 0.25]","[0.25, 0.0, 0.45, 0.25]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.0,
+  ""x_max"": 0.45,
+  ""y_max"": 0.25
+}
+```"
+base_sample_32,catcher,1,False,True,"[0.87, 0.5, 1.0, 0.87]","[0.87, 0.5, 1.0, 0.87]","```json
+{
+  ""x_min"": 0.87,
+  ""y_min"": 0.5,
+  ""x_max"": 1.0,
+  ""y_max"": 0.87
+}
+```"
+base_sample_33,striped shirt of person on right,1,False,True,"[0.7, 0.0, 1.0, 1.0]","[0.7, 0.0, 1.0, 1.0]","```json
+{
+  ""x_min"": 0.7,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 1.0
+}
+```"
+base_sample_34,far right guy sitting,1,False,True,"[0.78, 0.38, 1.0, 0.85]","[0.78, 0.38, 1.0, 0.85]","```json
+{
+  ""x_min"": 0.78,
+  ""y_min"": 0.38,
+  ""x_max"": 1.0,
+  ""y_max"": 0.85
+}
+```"
+base_sample_35,far left elephant,1,False,True,"[0.0, 0.0, 0.25, 0.5]","[0.0, 0.0, 0.25, 0.5]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 0.25,
+  ""y_max"": 0.5
+}
+```"
+base_sample_36,sitting down,1,False,True,"[0.62, 0.22, 0.78, 0.78]","[0.62, 0.22, 0.78, 0.78]","```json
+{
+  ""x_min"": 0.62,
+  ""y_min"": 0.22,
+  ""x_max"": 0.78,
+  ""y_max"": 0.78
+}
+```"
+base_sample_37,girl in blue top,1,False,True,"[0.35, 0.44, 0.5, 0.65]","[0.35, 0.44, 0.5, 0.65]","```json
+{
+  ""x_min"": 0.35,
+  ""y_min"": 0.44,
+  ""x_max"": 0.5,
+  ""y_max"": 0.65
+}
+```"
+base_sample_38,"cat, but not in reflection",1,False,True,"[0.0, 0.0, 1.0, 1.0]","[0.0, 0.0, 1.0, 1.0]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 1.0
+}
+```"
+base_sample_39,smallest elephant,1,False,True,"[0.48, 0.32, 0.94, 0.75]","[0.48, 0.32, 0.94, 0.75]","```json
+{
+  ""x_min"": 0.48,
+  ""y_min"": 0.32,
+  ""x_max"": 0.94,
+  ""y_max"": 0.75
+}
+```"
+base_sample_40,second donut in the middle,1,False,True,"[0.28, 0.18, 0.48, 0.38]","[0.28, 0.18, 0.48, 0.38]","```json
+{
+  ""x_min"": 0.28,
+  ""y_min"": 0.18,
+  ""x_max"": 0.48,
+  ""y_max"": 0.38
+}
+```"
+base_sample_41,woman,1,False,True,"[0.18, 0.32, 0.54, 0.72]","[0.18, 0.32, 0.54, 0.72]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.32,
+  ""x_max"": 0.54,
+  ""y_max"": 0.72
+}
+```"
+base_sample_42,right player,1,False,True,"[0.38, 0.2, 0.68, 0.88]","[0.38, 0.2, 0.68, 0.88]","```json
+{
+  ""x_min"": 0.38,
+  ""y_min"": 0.2,
+  ""x_max"": 0.68,
+  ""y_max"": 0.88
+}
+```"
+base_sample_43,part of cow far left,1,False,True,"[0.0, 0.22, 0.38, 0.85]","[0.0, 0.22, 0.38, 0.85]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.22,
+  ""x_max"": 0.38,
+  ""y_max"": 0.85
+}
+```"
+base_sample_44,GUY STANDNG,1,False,True,"[0.72, 0.28, 0.95, 0.78]","[0.72, 0.28, 0.95, 0.78]","```json
+{
+  ""x_min"": 0.72,
+  ""y_min"": 0.28,
+  ""x_max"": 0.95,
+  ""y_max"": 0.78
+}
+```"
+base_sample_45,man on right,1,False,True,"[0.47, 0.0, 0.65, 1.0]","[0.47, 0.0, 0.65, 1.0]","```json
+{
+  ""x_min"": 0.47,
+  ""y_min"": 0.0,
+  ""x_max"": 0.65,
+  ""y_max"": 1.0
+}
+```"
+base_sample_46,"bottom right white tank of motorcycle, u can see its seat",1,False,True,"[0.88, 0.55, 1.0, 0.75]","[0.88, 0.55, 1.0, 0.75]","```json
+{
+  ""x_min"": 0.88,
+  ""y_min"": 0.55,
+  ""x_max"": 1.0,
+  ""y_max"": 0.75
+}
+```"
+base_sample_47,green shirt,1,False,True,"[0.12, 0.25, 0.67, 0.82]","[0.12, 0.25, 0.67, 0.82]","```json
+{
+  ""x_min"": 0.12,
+  ""y_min"": 0.25,
+  ""x_max"": 0.67,
+  ""y_max"": 0.82
+}
+```"
+base_sample_48,the batter,1,False,True,"[0.25, 0.2, 0.52, 0.85]","[0.25, 0.2, 0.52, 0.85]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.2,
+  ""x_max"": 0.52,
+  ""y_max"": 0.85
+}
+```"
+base_sample_49,sandwich on left,1,False,True,"[0.0, 0.0, 0.45, 0.62]","[0.0, 0.0, 0.45, 0.62]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 0.45,
+  ""y_max"": 0.62
+}
+```"
+base_sample_50,man with hat,1,False,True,"[0.28, 0.28, 0.65, 0.84]","[0.28, 0.28, 0.65, 0.84]","```json
+{
+  ""x_min"": 0.28,
+  ""y_min"": 0.28,
+  ""x_max"": 0.65,
+  ""y_max"": 0.84
+}
+```"
+base_sample_51,girl in the middle,1,False,True,"[0.35, 0.44, 0.5, 0.65]","[0.35, 0.44, 0.5, 0.65]","```json
+{
+  ""x_min"": 0.35,
+  ""y_min"": 0.44,
+  ""x_max"": 0.5,
+  ""y_max"": 0.65
+}
+```"
+base_sample_52,Elephant at right,1,False,True,"[0.57, 0.3, 0.78, 0.78]","[0.57, 0.3, 0.78, 0.78]","```json
+{
+  ""x_min"": 0.57,
+  ""y_min"": 0.3,
+  ""x_max"": 0.78,
+  ""y_max"": 0.78
+}
+```"
+base_sample_53,elephant on right,1,False,True,"[0.57, 0.3, 0.78, 0.78]","[0.57, 0.3, 0.78, 0.78]","```json
+{
+  ""x_min"": 0.57,
+  ""y_min"": 0.3,
+  ""x_max"": 0.78,
+  ""y_max"": 0.78
+}
+```"
+base_sample_54,the woman using the cell phone,1,False,True,"[0.25, 0.47, 0.68, 0.82]","[0.25, 0.47, 0.68, 0.82]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.47,
+  ""x_max"": 0.68,
+  ""y_max"": 0.82
+}
+```"
+base_sample_55,man in chair on right,1,False,True,"[0.78, 0.38, 1.0, 0.85]","[0.78, 0.38, 1.0, 0.85]","```json
+{
+  ""x_min"": 0.78,
+  ""y_min"": 0.38,
+  ""x_max"": 1.0,
+  ""y_max"": 0.85
+}
+```"
+base_sample_56,top right corner,1,False,True,"[0.95, 0.0, 1.0, 0.1]","[0.95, 0.0, 1.0, 0.1]","```json
+{
+  ""x_min"": 0.95,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 0.1
+}
+```"
+base_sample_57,Shirt in upper right corner,1,False,True,"[0.78, 0.0, 1.0, 0.2]","[0.78, 0.0, 1.0, 0.2]","```json
+{
+  ""x_min"": 0.78,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 0.2
+}
+```"
+base_sample_58,woman,1,False,True,"[0.18, 0.32, 0.54, 0.72]","[0.18, 0.32, 0.54, 0.72]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.32,
+  ""x_max"": 0.54,
+  ""y_max"": 0.72
+}
+```"
+base_sample_59,guy texting,1,False,True,"[0.73, 0.28, 0.94, 0.78]","[0.73, 0.28, 0.94, 0.78]","```json
+{
+  ""x_min"": 0.73,
+  ""y_min"": 0.28,
+  ""x_max"": 0.94,
+  ""y_max"": 0.78
+}
+```"
+base_sample_60,front whit,1,False,True,"[0.34, 0.44, 0.62, 0.72]","[0.34, 0.44, 0.62, 0.72]","```json
+{
+  ""x_min"": 0.34,
+  ""y_min"": 0.44,
+  ""x_max"": 0.62,
+  ""y_max"": 0.72
+}
+```"
+base_sample_61,man in light blue,1,False,True,"[0.84, 0.45, 0.95, 0.84]","[0.84, 0.45, 0.95, 0.84]","```json
+{
+  ""x_min"": 0.84,
+  ""y_min"": 0.45,
+  ""x_max"": 0.95,
+  ""y_max"": 0.84
+}
+```"
+base_sample_62,white motorcycle on bottom right,1,False,True,"[0.88, 0.58, 1.0, 0.78]","[0.88, 0.58, 1.0, 0.78]","```json
+{
+  ""x_min"": 0.88,
+  ""y_min"": 0.58,
+  ""x_max"": 1.0,
+  ""y_max"": 0.78
+}
+```"
+base_sample_63,sandwich on left,1,False,True,"[0.0, 0.0, 0.45, 0.62]","[0.0, 0.0, 0.45, 0.62]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 0.45,
+  ""y_max"": 0.62
+}
+```"
+base_sample_64,catcher,1,False,True,"[0.87, 0.5, 1.0, 0.87]","[0.87, 0.5, 1.0, 0.87]","```json
+{
+  ""x_min"": 0.87,
+  ""y_min"": 0.5,
+  ""x_max"": 1.0,
+  ""y_max"": 0.87
+}
+```"
+base_sample_65,giraffe on right,1,False,True,"[0.65, 0.25, 0.78, 0.78]","[0.65, 0.25, 0.78, 0.78]","```json
+{
+  ""x_min"": 0.65,
+  ""y_min"": 0.25,
+  ""x_max"": 0.78,
+  ""y_max"": 0.78
+}
+```"
+base_sample_66,middle tray. 2nd closest donut,1,False,True,"[0.25, 0.18, 0.5, 0.55]","[0.25, 0.18, 0.5, 0.55]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.18,
+  ""x_max"": 0.5,
+  ""y_max"": 0.55
+}
+```"
+base_sample_67,right elephant,1,False,True,"[0.57, 0.3, 0.78, 0.78]","[0.57, 0.3, 0.78, 0.78]","```json
+{
+  ""x_min"": 0.57,
+  ""y_min"": 0.3,
+  ""x_max"": 0.78,
+  ""y_max"": 0.78
+}
+```"
+base_sample_68,baseball player,1,False,True,"[0.25, 0.25, 0.52, 0.85]","[0.25, 0.25, 0.52, 0.85]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.25,
+  ""x_max"": 0.52,
+  ""y_max"": 0.85
+}
+```"
+base_sample_69,girl in the middle in blue jacket,1,False,True,"[0.35, 0.44, 0.5, 0.65]","[0.35, 0.44, 0.5, 0.65]","```json
+{
+  ""x_min"": 0.35,
+  ""y_min"": 0.44,
+  ""x_max"": 0.5,
+  ""y_max"": 0.65
+}
+```"
+base_sample_70,man,1,False,True,"[0.28, 0.32, 0.68, 0.84]","[0.28, 0.32, 0.68, 0.84]","```json
+{
+  ""x_min"": 0.28,
+  ""y_min"": 0.32,
+  ""x_max"": 0.68,
+  ""y_max"": 0.84
+}
+```"
+base_sample_71,Blue coveralls,1,False,True,"[0.85, 0.0, 0.95, 0.99]","[0.85, 0.0, 0.95, 0.99]","```json
+{
+  ""x_min"": 0.85,
+  ""y_min"": 0.0,
+  ""x_max"": 0.95,
+  ""y_max"": 0.99
+}
+```"
+base_sample_72,right elep,1,False,True,"[0.48, 0.28, 0.95, 0.8]","[0.48, 0.28, 0.95, 0.8]","```json
+{
+  ""x_min"": 0.48,
+  ""y_min"": 0.28,
+  ""x_max"": 0.95,
+  ""y_max"": 0.8
+}
+```"
+base_sample_73,elephant on left,1,False,True,"[0.0, 0.0, 0.5, 1.0]","[0.0, 0.0, 0.5, 1.0]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.0,
+  ""x_max"": 0.5,
+  ""y_max"": 1.0
+}
+```"
+base_sample_74,blue sofa towards back,1,False,True,"[0.18, 0.25, 0.52, 0.52]","[0.18, 0.25, 0.52, 0.52]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.25,
+  ""x_max"": 0.52,
+  ""y_max"": 0.52
+}
+```"
+base_sample_75,stripped shirt,1,False,True,"[0.7, 0.0, 1.0, 1.0]","[0.7, 0.0, 1.0, 1.0]","```json
+{
+  ""x_min"": 0.7,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 1.0
+}
+```"
+base_sample_76,batter,1,False,True,"[0.34, 0.41, 0.65, 0.82]","[0.34, 0.41, 0.65, 0.82]","```json
+{
+  ""x_min"": 0.34,
+  ""y_min"": 0.41,
+  ""x_max"": 0.65,
+  ""y_max"": 0.82
+}
+```"
+base_sample_77,elephant on left,1,False,True,"[0.07, 0.12, 0.45, 0.65]","[0.07, 0.12, 0.45, 0.65]","```json
+{
+  ""x_min"": 0.07,
+  ""y_min"": 0.12,
+  ""x_max"": 0.45,
+  ""y_max"": 0.65
+}
+```"
+base_sample_78,girl,1,False,True,"[0.18, 0.32, 0.54, 0.72]","[0.18, 0.32, 0.54, 0.72]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.32,
+  ""x_max"": 0.54,
+  ""y_max"": 0.72
+}
+```"
+base_sample_79,left big elephant,1,False,True,"[0.07, 0.07, 0.45, 0.85]","[0.07, 0.07, 0.45, 0.85]","```json
+{
+  ""x_min"": 0.07,
+  ""y_min"": 0.07,
+  ""x_max"": 0.45,
+  ""y_max"": 0.85
+}
+```"
+base_sample_80,Guy standing on rt,1,False,True,"[0.73, 0.28, 0.95, 0.78]","[0.73, 0.28, 0.95, 0.78]","```json
+{
+  ""x_min"": 0.73,
+  ""y_min"": 0.28,
+  ""x_max"": 0.95,
+  ""y_max"": 0.78
+}
+```"
+base_sample_81,38,1,False,True,"[0.22, 0.22, 0.42, 0.42]","[0.22, 0.22, 0.42, 0.42]","```json
+{
+  ""x_min"": 0.22,
+  ""y_min"": 0.22,
+  ""x_max"": 0.42,
+  ""y_max"": 0.42
+}
+```"
+base_sample_82,cup of coffee,1,False,True,"[0.58, 0.0, 0.85, 0.3]","[0.58, 0.0, 0.85, 0.3]","```json
+{
+  ""x_min"": 0.58,
+  ""y_min"": 0.0,
+  ""x_max"": 0.85,
+  ""y_max"": 0.3
+}
+```"
+base_sample_83,"couch at upper left with blue seats, white pillows",1,False,True,"[0.15, 0.25, 0.55, 0.52]","[0.15, 0.25, 0.55, 0.52]","```json
+{
+  ""x_min"": 0.15,
+  ""y_min"": 0.25,
+  ""x_max"": 0.55,
+  ""y_max"": 0.52
+}
+```"
+base_sample_84,number 19,1,False,True,"[0.25, 0.2, 0.5, 0.7]","[0.25, 0.2, 0.5, 0.7]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.2,
+  ""x_max"": 0.5,
+  ""y_max"": 0.7
+}
+```"
+base_sample_85,guy holding cup,1,False,True,"[0.67, 0.0, 0.88, 1.0]","[0.67, 0.0, 0.88, 1.0]","```json
+{
+  ""x_min"": 0.67,
+  ""y_min"": 0.0,
+  ""x_max"": 0.88,
+  ""y_max"": 1.0
+}
+```"
+base_sample_86,cow at the back,1,False,True,"[0.0, 0.22, 0.48, 0.82]","[0.0, 0.22, 0.48, 0.82]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.22,
+  ""x_max"": 0.48,
+  ""y_max"": 0.82
+}
+```"
+base_sample_87,kid in back with green frizbee,1,False,True,"[0.25, 0.3, 0.5, 0.6]","[0.25, 0.3, 0.5, 0.6]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.3,
+  ""x_max"": 0.5,
+  ""y_max"": 0.6
+}
+```"
+base_sample_88,kblack laptop,1,False,True,"[0.0, 0.2, 0.6, 0.8]","[0.0, 0.2, 0.6, 0.8]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.2,
+  ""x_max"": 0.6,
+  ""y_max"": 0.8
+}
+```"
+base_sample_89,right giraffe,1,False,True,"[0.65, 0.25, 0.78, 0.78]","[0.65, 0.25, 0.78, 0.78]","```json
+{
+  ""x_min"": 0.65,
+  ""y_min"": 0.25,
+  ""x_max"": 0.78,
+  ""y_max"": 0.78
+}
+```"
+base_sample_90,red shirt,1,False,True,"[0.18, 0.25, 0.45, 0.65]","[0.18, 0.25, 0.45, 0.65]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.25,
+  ""x_max"": 0.45,
+  ""y_max"": 0.65
+}
+```"
+base_sample_91,man,1,False,True,"[0.47, 0.0, 0.63, 0.65]","[0.47, 0.0, 0.63, 0.65]","```json
+{
+  ""x_min"": 0.47,
+  ""y_min"": 0.0,
+  ""x_max"": 0.63,
+  ""y_max"": 0.65
+}
+```"
+base_sample_92,the man in pink with blue cup,1,False,True,"[0.44, 0.0, 0.68, 1.0]","[0.44, 0.0, 0.68, 1.0]","```json
+{
+  ""x_min"": 0.44,
+  ""y_min"": 0.0,
+  ""x_max"": 0.68,
+  ""y_max"": 1.0
+}
+```"
+base_sample_93,foremost person,1,False,True,"[0.12, 0.25, 0.67, 0.84]","[0.12, 0.25, 0.67, 0.84]","```json
+{
+  ""x_min"": 0.12,
+  ""y_min"": 0.25,
+  ""x_max"": 0.67,
+  ""y_max"": 0.84
+}
+```"
+base_sample_94,BLUE COUCH IN BACK,1,False,True,"[0.18, 0.25, 0.52, 0.52]","[0.18, 0.25, 0.52, 0.52]","```json
+{
+  ""x_min"": 0.18,
+  ""y_min"": 0.25,
+  ""x_max"": 0.52,
+  ""y_max"": 0.52
+}
+```"
+base_sample_95,girl on the phone in the front,1,False,True,"[0.25, 0.47, 0.68, 0.85]","[0.25, 0.47, 0.68, 0.85]","```json
+{
+  ""x_min"": 0.25,
+  ""y_min"": 0.47,
+  ""x_max"": 0.68,
+  ""y_max"": 0.85
+}
+```"
+base_sample_96,black laptop,1,False,True,"[0.0, 0.2, 0.6, 0.8]","[0.0, 0.2, 0.6, 0.8]","```json
+{
+  ""x_min"": 0.0,
+  ""y_min"": 0.2,
+  ""x_max"": 0.6,
+  ""y_max"": 0.8
+}
+```"
+base_sample_97,The coffee mug,1,False,True,"[0.58, 0.0, 0.85, 0.3]","[0.58, 0.0, 0.85, 0.3]","```json
+{
+  ""x_min"": 0.58,
+  ""y_min"": 0.0,
+  ""x_max"": 0.85,
+  ""y_max"": 0.3
+}
+```"
+base_sample_98,person upper right corner,1,False,True,"[0.78, 0.0, 1.0, 0.25]","[0.78, 0.0, 1.0, 0.25]","```json
+{
+  ""x_min"": 0.78,
+  ""y_min"": 0.0,
+  ""x_max"": 1.0,
+  ""y_max"": 0.25
+}
+```"
+base_sample_99,catcher,1,False,True,"[0.87, 0.5, 1.0, 0.87]","[0.87, 0.5, 1.0, 0.87]","```json
+{
+  ""x_min"": 0.87,
+  ""y_min"": 0.5,
+  ""x_max"": 1.0,
+  ""y_max"": 0.87
+}
+```"

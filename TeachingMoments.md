@@ -8,6 +8,7 @@ This document serves as a living knowledge base - a collection of concepts, tech
 
 1. [Model Quantization & Bitsandbytes](#1-model-quantization--bitsandbytes)
 2. [Label Masking in Vision-Language Model Training](#2-label-masking-in-vision-language-model-training)
+3. [Interpreting Detection Metrics & Improving Grounding Models](#3-interpreting-detection-metrics--improving-grounding-models)
 
 ---
 
@@ -330,6 +331,128 @@ This bug wasted:
 - But taught an invaluable lesson about vision-language model internals
 
 **The silver lining:** You now understand tokenization, masking, and vision tokens at a deep level that most practitioners never reach. This knowledge transfers to ANY vision-language model (CLIP, LLaVA, Qwen-VL, GPT-4V concepts, etc.).
+
+---
+
+## 3. Interpreting Detection Metrics & Improving Grounding Models
+
+**Date:** 2025-11-23  
+**Context:** Evaluation blocks in `notebooks/train_qwen3_refcoco.ipynb` compare the base Qwen3-VL-2B model against the LoRA-fine-tuned checkpoint on 50 RefCOCO samples.
+
+### How to Read the Metrics
+
+- **Detection Rate** counts how often the model emits a bounding box in the correct JSON format. Base = 90% (45/50), fine-tuned = 100% (50/50). The adapter training eliminated formatting failures so every sample now returns a parseable box.
+- **IoU (Intersection-over-Union)** measures overlap quality but only when a box exists. Base mean IoU is 0.1114 (median 0.0), meaning half of the “successful” predictions do not overlap the ground truth at all. Fine-tuning increases mean IoU to 0.3372 and median to 0.1043, so localization is noticeably better but still far from the ≥0.5 IoU that detection systems usually target.
+- **Accuracy@τ** reports the share of samples with IoU ≥ τ. Base accuracy@0.5 = 8% (4/50) and @0.75 = 2% (1/50). Fine-tuned accuracy@0.5 jumps to 34% (17/50) and accuracy@0.75 to 28% (14/50), showing that around one-third of predictions now cross the typical “usable box” threshold while high-IoU matches (≥0.75) improved dramatically.
+
+In short, fine-tuning solved structural output errors, raised overlap quality, but most phrases still fail to reach solid IoU, so more work is required before shipping.
+
+### Actionable Improvement Plan
+
+1. **Broaden and balance referring-expression data.**  
+   - *Action:* Merge RefCOCO, RefCOCO+, RefCOCOg, and custom captures, ensuring splits cover diverse linguistic patterns, object sizes, and relational cues. Add negative/no-object samples.  
+   - *Why:* The median IoU ≈ 0.10 implies the model still “guesses” boxes; richer coverage teaches it to resolve modifiers (“small dog on the left”) rather than defaulting to common regions.
+   - *M4 Max:* Feasible; most work is data curation/augmentation that is CPU-bound or relies on lightweight LLM calls. Model training on expanded sets will be slow but manageable if batches stay small.  
+   - *RunPod:* Ideal for retraining on the enlarged dataset because higher GPU memory lets you increase batch size and finish epochs faster.
+
+2. **Strengthen supervision with detection-friendly losses.**  
+   - *Action:* Decode the model’s bbox tokens back to coordinates during training and apply L1 + GIoU/DIoU losses, or attach an auxiliary regression head fed from the decoder hidden state.  
+   - *Why:* Current loss only checks token-level correctness; adding geometric loss directly optimizes spatial accuracy instead of relying on post-hoc IoU evaluation.
+   - *M4 Max:* Implementing the loss is fine, but mixed precision/GIoU operations on MPS can be unstable and slow; debugging autograd for custom losses may be tedious.  
+   - *RunPod:* Best environment to test new geometric losses since CUDA kernels are mature and you can iterate faster with better profiler tooling.
+
+3. **Tune LoRA capacity and schedules.**  
+   - *Action:* Sweep LoRA rank (32→128), α, and dropout; extend training epochs with cosine decay + warmup; monitor eval IoU after each epoch.  
+   - *Why:* The modest IoU jump hints at underfitting—more adapter capacity or better scheduling lets the model specialize on grounding without forgetting language skills.
+   - *M4 Max:* Practical only for a couple of small experiments due to limited parallelism and slower training; hyperparameter sweeps become multi-day tasks.  
+   - *RunPod:* Enables parallel or at least faster sequential sweeps with larger ranks (R=128+) without worrying about unified-memory pressure.
+
+4. **Apply curriculum + augmentation for complex phrases.**  
+   - *Action:* Start training on simple noun phrases, then progressively include attribute-rich and relational descriptions; augment by jittering ground-truth boxes, random crops, and LLM paraphrases of the text queries.  
+   - *Why:* Many failures surface on long, relational phrases; curriculum learning and augmented phrasing teach invariance to wording and spatial transformations.
+   - *M4 Max:* Data-side curriculum/augmentations are inexpensive; the main cost is retraining after each curriculum stage, which is slow but doable.  
+   - *RunPod:* Lets you shorten iteration cycles and try more curriculum schedules since each training phase completes sooner.
+
+5. **Improve inference/post-processing.**  
+   - *Action:* Clip decoded boxes to image bounds, reject degenerate boxes, sample multiple responses and keep the one whose crop best matches the phrase (CLIP similarity), and log invalid outputs.  
+   - *Why:* Even with the current model, simple post-processing can lift IoU by fixing format drift and filtering out obvious mistakes before scoring.
+   - *M4 Max:* Entirely feasible locally; operations run on CPU/GPU lightly and help evaluate improvements before pushing to heavier hardware.  
+   - *RunPod:* Not necessary unless you need to benchmark large validation sets quickly; otherwise this step is hardware-agnostic.
+
+6. **Close the loop with diagnostics.**  
+   - *Action:* Persist per-sample logs: phrase, GT bbox, predicted bbox, IoU, raw response, image hash. Analyze failures by phrase length, object class, and IoU bucket to prioritize fixes.  
+   - *Why:* Systematic error analysis turns instinct into evidence, guiding whether to collect more data, tweak losses, or adjust inference.
+   - *M4 Max:* Straightforward; exporting CSVs/plots is CPU-bound. Visualization notebooks run fine locally.  
+   - *RunPod:* Useful when running large-scale evals (e.g., thousands of samples) where GPU inference plus logging needs to finish fast.
+
+Following this plan increases data diversity, adds geometry-aware training signals, unlocks more capacity in adapters, and tightens inference quality—concrete levers that should push IoU and accuracy@0.5 toward production targets.
+
+---
+
+## 4. Additional Learning Resources
+
+**Date:** 2025-11-23  
+**Context:** Curating go-to references for grounding models, LoRA fine-tuning, and detection-style evaluation tactics while iterating on the RefCOCO experiments.
+
+### What is this section?
+Hand-picked resources (papers, blogs, repos, lectures) that deepen understanding of referring expression grounding, multi-modal fine-tuning, and metric interpretation.
+
+### Why Does It Matter?
+Having a vetted reading list saves time when you need theoretical backing (e.g., for IoU-based losses) or implementation templates (e.g., LoRA sweeps on GPUs) before investing compute cycles.
+
+### Code Examples
+- [Grounding DINO GitHub](https://github.com/IDEA-Research/GroundingDINO) — End-to-end referring expression detector with strong IoU benchmarks and training scripts you can mine for loss implementations.
+- [Qwen-VL Tutorials](https://github.com/QwenLM/Qwen-VL) — Official notebooks showing how to structure prompts, decode bounding boxes, and run LoRA on larger GPUs.
+
+### Key Takeaways
+- Keep a mix of *conceptual* (papers, lecture notes) and *practical* (repos, blogs) resources so you can bridge theory ↔ code quickly.
+- Revisit these references whenever a metric stalls; chances are there is a known technique (e.g., GIoU loss) already well-documented.
+
+### Related Concepts to Explore
+- **Papers:** “Referring Expressions as Programs” (Yu et al. 2018), “Grounded Language-Image Pre-training” (Li et al. 2022).  
+- **Talks:** Stanford CS231n guest lecture on grounding & detection metrics.  
+- **Blogs:** Hugging Face course chapter on LoRA & QLoRA for vision-language models.  
+- **Repos:** OpenGVLab’s [InternVL](https://github.com/OpenGVLab/InternVL) for large-scale VL fine-tuning recipes.  
+- **Courses:** fast.ai Part 2 (2023) lessons on multi-modal modeling and prompt engineering pitfalls.
+
+---
+
+## 5. Validation Loss Plateaus & Prompt Flow in RefCOCO
+
+**Date:** 2025-11-23  
+**Context:** Training runs logged in `logs/training_history.json` show the validation loss dipping but settling around **0.635** after epoch 3 / step 200, and questions arose about how the referring expression is injected during inference (evaluation cell in `notebooks/train_qwen3_refcoco.ipynb`).
+
+### What does a 0.635 validation loss tell us?
+
+- The loss is the token-level cross-entropy between the generated JSON bbox and the ground truth. A value near 0.63 ≈ perplexity 1.88, meaning the model is still uncertain about the correct coordinate tokens. It is lower than the base model (which hovered near 0.9+) but far from “confident” (≤0.2). In other words, the adapters learned something but have not saturated; 0.63 corresponds to IoUs in the ~0.3 range we see in evaluation.
+- The downward trend implies the optimizer is still making progress—no overfitting, yet also no rapid convergence. With small batch sizes on M4 Max, the effective learning signal per step is weak, so the plateau may be caused by limited data, insufficient rank/schedule, or the fact that the loss only considers text similarity (not IoU).
+
+### What should an ML engineer do?
+
+1. **Extend training or add curriculum:** Keep fine-tuning for more epochs (with checkpoint saves) or stage the data so the model sees easier phrases first. Since loss never spikes, we can safely resume from the last checkpoint and push further.
+2. **Introduce geometry-aware loss:** Add an auxiliary IoU/L1 loss during training so the adapter directly optimizes spatial accuracy, not just token matching.
+3. **Increase effective batch size:** Use gradient accumulation or offload to RunPod to raise the batch size, improving gradient estimates. This often unlocks sharper loss drops, especially for structured generation problems.
+4. **Hyperparameter sweep:** The plateau suggests underfitting. Sweeping LoRA rank (R), learning rate, and warmup length may reveal a configuration that continues decreasing loss beyond 0.6.
+5. **Data augmentation:** If validation and training losses track closely, more diverse phrases/boxes are needed. Augment text (LLM paraphrases) and boxes (jitter, flips) so the model generalizes better and continues lowering loss.
+
+### Where does the model read the referring expression?
+
+- In `src/pipeline/inference.py:93-147`, each evaluation sample passes `sample['phrase']` into `build_grounding_prompt(phrase)` (imported at the top of the file). The resulting text is injected into the user turn of the chat template together with the image.
+- Inside the notebook’s evaluation loop (`notebooks/train_qwen3_refcoco.ipynb:1340-1380` for the base model and `1588-1628` for the trained model), every call to `predict_grounding_bbox(...)` includes that `phrase`. Later, the visualization cell adds `fig.suptitle(f"Phrase: \"{sample['phrase']}\"")`, which is why the figure title matches the instruction the LLM saw.
+- Section 22 of the notebook explicitly reconstructs the prompt by calling `build_grounding_prompt(sample_phrase)` and printing the formatted conversation, so you can inspect the exact text the model receives.
+- **Important:** The current RefCOCO metadata (`data/refcoco/val/metadata.json`) shows placeholder phrases such as “Please carefully observe the area circled…” instead of true referring expressions. Because the notebook pulls `sample["phrase"]` verbatim, the model is learning to predict boxes from a generic instruction with *no* semantic link to the object. This explains why loss/IoU plateau so early—the text provides no discriminative signal. Fixing the dataset (restore real phrases or synthesize meaningful descriptions) is mandatory before expecting strong performance.
+
+### Key Takeaways
+
+- Validation loss ≈0.63 signals partial learning but not production-grade accuracy; treat it as a cue to run longer, add supervision, or enhance data.
+- The referring expression is consistently fed through `build_grounding_prompt` and the chat template, even if the visualization only shows it in the figure title—you can trust that the LLM sees the same text you see because it’s stored in `sample['phrase']` throughout.
+
+### Action Checklist
+
+1. Resume training from the last checkpoint with more epochs or larger effective batches.
+2. Prototype an IoU-aware auxiliary loss to push the loss below 0.5.
+3. Confirm prompt correctness by re-running the inspection cell (Sec. 22) after any prompt template tweaks.
+4. Audit the dataset phrases—if they remain generic placeholders, regenerate/refill them so each sample actually describes the ground-truth region; otherwise the model has no textual grounding signal to learn from.
 
 ---
 

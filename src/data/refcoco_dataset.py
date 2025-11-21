@@ -6,7 +6,7 @@ Loads data from HuggingFace and formats for phrase-conditioned bounding box pred
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from datasets import load_dataset
 
 from .box_utils import coco_to_xyxy, normalize_bbox, bbox_to_json
@@ -70,17 +70,37 @@ class RefCOCODataset(Dataset):
                     f"Could not load {dataset_name}. Please check the dataset name and your internet connection."
                 ) from e2
 
-        # Limit samples if requested
-        if max_samples and max_samples < len(self.dataset):
-            # Use deterministic sampling for reproducibility
-            indices = list(range(min(max_samples, len(self.dataset))))
-            self.dataset = self.dataset.select(indices)
+        base_count = len(self.dataset)
 
-        print(f"Loaded {len(self.dataset)} samples")
+        # Expand samples so each referring expression becomes its own row
+        self.samples = []
+        for idx, sample in enumerate(self.dataset):
+            phrases = self._extract_phrases(sample)
+            if not phrases:
+                # Fall back to question or generic text so dataset remains usable
+                fallback_phrase = self._extract_single_phrase(sample)
+                phrases = [fallback_phrase]
+
+            for phrase in phrases:
+                self.samples.append(
+                    {
+                        "dataset_idx": idx,
+                        "phrase": phrase,
+                    }
+                )
+
+        expanded_count = len(self.samples)
+        avg_per_image = expanded_count / base_count if base_count else 0
+        print(f"Loaded {base_count} base samples -> {expanded_count} phrase samples (avg {avg_per_image:.2f} per image)")
+
+        # Limit samples if requested (after expansion to honor phrase-level counts)
+        if max_samples and max_samples < len(self.samples):
+            self.samples = self.samples[:max_samples]
+            print(f"Truncated to {len(self.samples)} phrase samples due to max_samples")
 
     def __len__(self) -> int:
         """Return number of samples."""
-        return len(self.dataset)
+        return len(self.samples)
 
     def __getitem__(self, idx: int) -> Dict:
         """
@@ -95,7 +115,8 @@ class RefCOCODataset(Dataset):
             - bbox_norm: tuple of (x_min, y_min, x_max, y_max) in [0, 1]
             - bbox_json: str (JSON representation)
         """
-        sample = self.dataset[idx]
+        phrase_entry = self.samples[idx]
+        sample = self.dataset[phrase_entry["dataset_idx"]]
 
         # Extract image
         # Note: Field names may vary depending on HF dataset structure
@@ -118,20 +139,15 @@ class RefCOCODataset(Dataset):
         # Get image dimensions
         width, height = image.size
 
-        # Extract referring expression
-        # For lmms-lab/RefCOCO, the phrase is in "question" field
-        if "question" in sample:
-            phrase = sample["question"]
-        elif "sentence" in sample:
-            phrase = sample["sentence"]
-        elif "expression" in sample:
-            phrase = sample["expression"]
-        elif "text" in sample:
-            phrase = sample["text"]
-        elif "phrase" in sample:
-            phrase = sample["phrase"]
-        else:
-            raise KeyError(f"Could not find phrase field in sample. Available keys: {sample.keys()}")
+        """
+        NOTES FOR CODEX:
+
+        1. answer is a list of strings, each string referring to a possible answer to the question that pertains to the image.
+        2. There's another field called segmentation, not sure what it is.
+        3. there's another field called iscrowd, not sure what it is.
+        """
+
+        phrase = phrase_entry["phrase"]
 
         # Extract bounding box in COCO format
         # Common field names: "bbox", "box", "bounding_box"
@@ -160,7 +176,54 @@ class RefCOCODataset(Dataset):
             "phrase": phrase,
             "bbox_norm": bbox_norm,
             "bbox_json": bbox_json,
+            "segmentation": sample.get("segmentation"),
+            "iscrowd": sample.get("iscrowd"),
         }
+
+    def _extract_phrases(self, sample: Dict) -> List[str]:
+        """Return clean list of referring expressions for a sample."""
+        phrases: List[str] = []
+
+        for key in ("answer", "answers", "expressions", "sentences"):
+            if key in sample:
+                value = sample[key]
+                if isinstance(value, list):
+                    phrases.extend([str(p).strip() for p in value if isinstance(p, str) and p.strip()])
+                elif isinstance(value, str) and value.strip():
+                    phrases.append(value.strip())
+
+        if phrases:
+            return phrases
+
+        direct_keys = ("expression", "sentence", "text", "phrase")
+        for key in direct_keys:
+            if key in sample:
+                value = sample[key]
+                if isinstance(value, list):
+                    phrases.extend([str(p).strip() for p in value if isinstance(p, str) and p.strip()])
+                elif isinstance(value, str) and value.strip():
+                    phrases.append(value.strip())
+
+        # Do not include question because it's usually the generic prompt
+        return phrases
+
+    def _extract_single_phrase(self, sample: Dict) -> str:
+        """Fallback when no explicit expressions are present."""
+        for key in ("expression", "sentence", "text", "phrase"):
+            value = sample.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, str) and item.strip():
+                        return item.strip()
+
+        # Last resort: use question/generic text
+        question = sample.get("question")
+        if isinstance(question, str) and question.strip():
+            return question.strip()
+
+        return "Describe the highlighted object."
 
 
 def create_refcoco_dataloader(
